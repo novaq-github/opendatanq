@@ -1,0 +1,706 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "dfopendatanq"
+		},
+		"AFAemet_functionKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'functionKey' of 'AFAemet'"
+		},
+		"APK2DB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'APK2DB'"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+		},
+		"DWH_open_data_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'DWH_open_data'"
+		},
+		"farma_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'farma'"
+		},
+		"pefformance_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'pefformance'"
+		},
+		"storage_avron_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'storage_avron'"
+		},
+		"AFAemet_properties_typeProperties_functionAppUrl": {
+			"type": "string",
+			"defaultValue": "https://afaemet.azurewebsites.net"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://opendatanq.dfs.core.windows.net/"
+		},
+		"scr_aemet_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{linkedService().url_datos_aemet}"
+		},
+		"storage_avron_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://opendatanq.dfs.core.windows.net/"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/AFAemet')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureFunction",
+				"typeProperties": {
+					"functionAppUrl": "[parameters('AFAemet_properties_typeProperties_functionAppUrl')]",
+					"functionKey": {
+						"type": "SecureString",
+						"value": "[parameters('AFAemet_functionKey')]"
+					},
+					"authentication": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/APK2DB')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('APK2DB_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobStorage1_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorage1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DWH_open_data')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('DWH_open_data_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/farma')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('farma_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pefformance')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('pefformance_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/scr_aemet')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"parameters": {
+					"url_datos_aemet": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('scr_aemet_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/storage_avron')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('storage_avron_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('storage_avron_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/todos_los_viernes_tarde')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Week",
+						"interval": 1,
+						"startTime": "2023-10-23T18:14:00",
+						"timeZone": "W. Europe Standard Time",
+						"schedule": {
+							"hours": [
+								20
+							],
+							"weekDays": [
+								"Friday"
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger4_borrar')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 15,
+						"startTime": "2024-02-01T18:43:00",
+						"endTime": "2024-02-02T18:43:00",
+						"timeZone": "Romance Standard Time",
+						"schedule": {
+							"minutes": [
+								30
+							],
+							"hours": [
+								23
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntimelocal')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/nvqltintruntimedes')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "Integration runtime acceso red interna nvqlt",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/1 AEMET PREDICCION_DIARIA')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Descarga predicciones diarias",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "prediccionesAemet",
+							"headers": {},
+							"method": "GET"
+						},
+						"linkedServiceName": {
+							"referenceName": "AFAemet",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "1 Source to Data_Lake"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-04-10T11:21:36Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AFAemet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/3 datos farms a DWH')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DV DIRECCIONES",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "INSERT INTO MAESTROS.LINK_DIRECCIONES\r\n    (hash_direccion, hash_codigo_provincia, hash_codigo_municipio, hash_codigo_tipo_via, [Código Postal], [Nombre de la vía], [Número Vía], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_direccion, \r\n    hash_codigo_provincia, \r\n    hash_codigo_municipio, \r\n    hash_codigo_tipo_via, \r\n    [Código Postal], \r\n    [Nombre de la vía], \r\n    [Número Vía], \r\n    LOAD_DTS \r\nFROM \r\n    farma.staging.vista_direcciones_hash d\r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.LINK_DIRECCIONES l WHERE l.hash_direccion = d.hash_direccion);\r\n\r\nINSERT INTO MAESTROS.HUB_TIPO_VIA \r\n    (hash_codigo_tipo_via, [Código Tipo Vía], LOAD_DTS)\r\nSELECT \r\n    d.hash_codigo_tipo_via, \r\n    d.[Código Tipo Vía], \r\n    LOAD_DTS\r\nFROM \r\n    staging.vista_direcciones_hash d\r\nWHERE     NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_VIA htv WHERE htv.hash_codigo_tipo_via = d.hash_codigo_tipo_via)\r\n;\r\n\r\nINSERT INTO MAESTROS.HUB_municipio\r\n    (hash_codigo_municipio, Municipio, [Código Municipio], LOAD_DTS)\r\nSELECT DISTINCT \r\n    d.hash_codigo_municipio, \r\n    d.Municipio, \r\n    d.[Código Municipio], \r\n    d.LOAD_DTS  LOAD_DTS\r\n    FROM \r\n    staging.vista_direcciones_hash d\r\nWHERE  NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_municipio hm WHERE hm.hash_codigo_municipio = d.hash_codigo_municipio)\r\n;\r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.vista_direcciones_hash Stg \r\n       INNER JOIN MAESTROS.SAT_DIRECCIONES Sat\r\n           ON  Sat.hash_direccion      = Stg.hash_direccion\r\n WHERE Sat.hash_diff <> Stg.[hash_diff]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ; \r\n\r\nINSERT INTO MAESTROS.SAT_DIRECCIONES \r\n    (hash_direccion, direccion_normalizada, lat, lng, geocodificador, cp, dq, START_DTS, END_DTS,hash_diff)\r\nSELECT DISTINCT \r\n    d.hash_direccion, \r\n    d.direccion_normalizada, \r\n    d.lat, \r\n    d.lng, \r\n    d.geocodificador, \r\n    d.cp, \r\n    d.dq, \r\n    d.LOAD_DTS START_DTS, \r\n    NULL END_DTS,\r\n    hash_diff\r\n--INTO MAESTROS.SAT_DIRECCIONES\r\n    FROM \r\n    staging.vista_direcciones_hash d    \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.SAT_DIRECCIONES sd WHERE sd.hash_direccion = d.hash_direccion AND sd.hash_diff = d.hash_diff);\r\n      \r\nINSERT INTO MAESTROS.HUB_PROVINCIA \r\n    (hash_codigo_provincia, Provincia, [Código Provincia], LOAD_DTS)\r\nSELECT DISTINCT\r\n    hash_codigo_provincia, \r\n    Provincia, \r\n    [Código Provincia], \r\n    LOAD_DTS\r\n--INTO MAESTROS.HUB_PROVINCIA  \r\nFROM \r\n    farma.staging.vista_direcciones_hash d\r\nWHERE     NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_PROVINCIA l WHERE l.hash_codigo_provincia = d.hash_codigo_provincia)\r\n;\r\n\r\n"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "DV CENTROS",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "DV DIRECCIONES",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "\r\n\r\nINSERT INTO MAESTROS.HUB_CODIGO_CENTRO \r\n    (hash_codigo_centro, [Código de Centro Normalizado REGCESS (CCN)], LOAD_DTS)\r\nSELECT \r\n    DISTINCT hash_codigo_centro, \r\n    [Código de Centro Normalizado REGCESS (CCN)], \r\n    LOAD_DTS\r\n--INTO MAESTROS.HUB_CODIGO_CENTRO \r\n    FROM \r\n    farma.staging.hash_centros_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_CODIGO_CENTRO WHERE hash_codigo_centro = farma.staging.hash_centros_view.hash_codigo_centro);\r\n   \r\n INSERT INTO MAESTROS.HUB_TIPO_CENTRO \r\n    (hash_tipo_centro, [Tipo centro], LOAD_DTS)\r\nSELECT \r\n    DISTINCT hash_tipo_centro, \r\n    [Tipo centro], \r\n    LOAD_DTS\r\n--INTO MAESTROS.HUB_TIPO_CENTRO \r\n    FROM \r\n    farma.staging.hash_centros_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_CENTRO WHERE hash_tipo_centro = farma.staging.hash_centros_view.hash_tipo_centro)\r\n   ;\r\n  \r\n  INSERT INTO MAESTROS.HUB_DEPENDENCIA_FUNCIONAL \r\n    (hash_dependencia_funcional, [Dependencia  Funcional], LOAD_DTS)\r\nSELECT \r\n    DISTINCT hash_dependencia_funcional, \r\n    [Dependencia  Funcional], \r\n    LOAD_DTS\r\n--INTO MAESTROS.HUB_DEPENDENCIA_FUNCIONAL \r\n    FROM \r\n    farma.staging.hash_centros_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_DEPENDENCIA_FUNCIONAL WHERE hash_dependencia_funcional = farma.staging.hash_centros_view.hash_dependencia_funcional);\r\n   \r\n   INSERT INTO MAESTROS.HUB_GRUPO_FUNCIONAL \r\n    (hash_grupo_funcional, [Grupo de dependencia  Funcional], LOAD_DTS)\r\nSELECT \r\n    DISTINCT hash_grupo_funcional, \r\n    [Grupo de dependencia  Funcional], \r\n    LOAD_DTS\r\n--INTO MAESTROS.HUB_GRUPO_FUNCIONAL\r\n    FROM \r\n    farma.staging.hash_centros_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_GRUPO_FUNCIONAL WHERE hash_grupo_funcional = farma.staging.hash_centros_view.hash_grupo_funcional);\r\n   \r\n   INSERT INTO MAESTROS.HUB_TIPO_AUTORIZACION \r\n    (hash_tipo_autorizacion, [Tipo de última Autorización], LOAD_DTS)\r\nSELECT \r\n    DISTINCT hash_tipo_autorizacion, \r\n    [Tipo de última Autorización], \r\n    LOAD_DTS\r\n--INTO MAESTROS.HUB_TIPO_AUTORIZACION \r\n    FROM \r\n    farma.staging.hash_centros_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_AUTORIZACION WHERE hash_tipo_autorizacion = farma.staging.hash_centros_view.hash_tipo_autorizacion);\r\n   \r\n\r\n   \r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.hash_centros_view Stg \r\n       INNER JOIN MAESTROS.SAT_CENTRO Sat\r\n           ON  Sat.hash_codigo_centro      = Stg.hash_codigo_centro\r\n WHERE Sat.hash_diff <> Stg.[hash_diff]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ;    \r\n   \r\n   \r\nINSERT INTO MAESTROS.SAT_CENTRO \r\n    (hash_codigo_centro, \r\n    [Nombre Centro], \r\n    [Código Comunidad Autónoma], \r\n    [Correo  Electrónico], \r\n    Fax, \r\n    Teléfono, \r\n    Url, \r\n    [Fecha Autorización  de Funcionamiento], \r\n    [Fecha de última  Autorización],\r\n     START_DTS,\r\n     END_DTS,\r\n     hash_diff)\r\nSELECT \r\n    DISTINCT hash_codigo_centro, \r\n    [Nombre Centro], \r\n    [Código Comunidad Autónoma], \r\n    [Correo  Electrónico], \r\n    Fax, \r\n    Teléfono, \r\n    Url, \r\n    [Fecha Autorización  de Funcionamiento], \r\n    [Fecha de última  Autorización],\r\n    LOAD_DTS  START_DTS,\r\n    NULL  END_DTS,\r\n    hash_diff    \r\n--INTO MAESTROS.SAT_CENTRO \r\n    FROM \r\n    farma.staging.hash_centros_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.SAT_CENTRO WHERE hash_codigo_centro = farma.staging.hash_centros_view.hash_codigo_centro AND hash_diff=hash_centros_view.hash_diff);\r\n   \r\n   \r\n   \r\n   \r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.hash_centros_view Stg \r\n       INNER JOIN MAESTROS.LINK_CENTRO_DIRECCION Sat\r\n           ON  Sat.hash_codigo_centro      = Stg.hash_codigo_centro\r\n WHERE Sat.hash_direccion <> Stg.[hash_direccion]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ;    \r\n \r\n   \r\nINSERT INTO MAESTROS.LINK_CENTRO_DIRECCION \r\n    ( hash_codigo_centro,\r\n     hash_direccion,\r\n     START_DTS,\r\n     END_DTS)   \r\n   SELECT \r\n    DISTINCT hash_codigo_centro, hash_direccion , LOAD_DTS START_DTS, NULL END_DTS\r\n--INTO MAESTROS.LINK_CENTRO_DIRECCION\r\nFROM \r\n    farma.staging.hash_centros_view    \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.LINK_CENTRO_DIRECCION \r\n   \t\t\t\tWHERE hash_codigo_centro = farma.staging.hash_centros_view.hash_codigo_centro AND\r\n   \t\t\t    hash_direccion =farma.staging.hash_centros_view.hash_direccion );\r\n   \r\n   \r\n\r\n\r\n\r\n\r\n  \r\n"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "DV medicos",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "DV CENTROS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "-- 1. HUB_CODIGO_CENTRO\r\nINSERT INTO MAESTROS.HUB_CODIGO_CENTRO \r\n    (hash_codigo_centro, [Código de Centro Normalizado REGCESS (CCN)], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_codigo_centro, \r\n    [Código de Centro Normalizado REGCESS (CCN)], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_medicos_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_CODIGO_CENTRO WHERE hash_codigo_centro = farma.staging.hash_medicos_view.hash_codigo_centro);\r\n\r\n-- 2. HUB_TIPO_CENTRO\r\nINSERT INTO MAESTROS.HUB_TIPO_CENTRO \r\n    (hash_tipo_centro, [Tipo centro], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_tipo_centro, \r\n    [Tipo centro], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_medicos_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_CENTRO WHERE hash_tipo_centro = farma.staging.hash_medicos_view.hash_tipo_centro);\r\n\r\n-- 3. HUB_DEPENDENCIA_FUNCIONAL\r\nINSERT INTO MAESTROS.HUB_DEPENDENCIA_FUNCIONAL \r\n    (hash_dependencia_funcional, [Dependencia  Funcional], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_dependencia_funcional, \r\n    [Dependencia  Funcional], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_medicos_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_DEPENDENCIA_FUNCIONAL WHERE hash_dependencia_funcional = farma.staging.hash_medicos_view.hash_dependencia_funcional);\r\n\r\n-- 4. HUB_GRUPO_FUNCIONAL\r\nINSERT INTO MAESTROS.HUB_GRUPO_FUNCIONAL \r\n    (hash_grupo_funcional, [Grupo de dependencia  Funcional], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_grupo_funcional, \r\n    [Grupo de dependencia  Funcional], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_medicos_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_GRUPO_FUNCIONAL WHERE hash_grupo_funcional = farma.staging.hash_medicos_view.hash_grupo_funcional);\r\n\r\n-- 5. HUB_TIPO_AUTORIZACION\r\nINSERT INTO MAESTROS.HUB_TIPO_AUTORIZACION \r\n    (hash_tipo_autorizacion, [Tipo de última Autorización], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_tipo_autorizacion, \r\n    [Tipo de última Autorización], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_medicos_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_AUTORIZACION WHERE hash_tipo_autorizacion = farma.staging.hash_medicos_view.hash_tipo_autorizacion);\r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.hash_centros_view Stg \r\n       INNER JOIN MAESTROS.SAT_CENTRO Sat\r\n           ON  Sat.hash_codigo_centro      = Stg.hash_codigo_centro\r\n WHERE Sat.hash_diff <> Stg.[hash_diff]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ;    \r\n   \r\n\r\n\r\nINSERT INTO MAESTROS.SAT_CENTRO \r\n    (hash_codigo_centro, \r\n    [Nombre Centro], \r\n    [Código Comunidad Autónoma], \r\n    [Correo  Electrónico], \r\n    Fax, \r\n    Teléfono, \r\n    Url, \r\n    [Fecha Autorización  de Funcionamiento], \r\n    [Fecha de última  Autorización],\r\n     START_DTS,\r\n     END_DTS,\r\n     hash_diff)\r\nSELECT \r\n    DISTINCT hash_codigo_centro, \r\n    [Nombre Centro], \r\n    [Código Comunidad Autónoma], \r\n    [Correo  Electrónico], \r\n    Fax, \r\n    Teléfono, \r\n    Url, \r\n    [Fecha Autorización  de Funcionamiento], \r\n    [Fecha de última  Autorización],\r\n    LOAD_DTS  START_DTS,\r\n    NULL  END_DTS,\r\n    hash_diff    \r\n--INTO MAESTROS.SAT_CENTRO \r\n    FROM \r\n    farma.staging.hash_medicos_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.SAT_CENTRO WHERE hash_codigo_centro = farma.staging.hash_medicos_view.hash_codigo_centro AND hash_diff=hash_medicos_view.hash_diff);\r\n   \r\n\r\n   \r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.hash_centros_view Stg \r\n       INNER JOIN MAESTROS.LINK_CENTRO_DIRECCION Sat\r\n           ON  Sat.hash_codigo_centro      = Stg.hash_codigo_centro\r\n WHERE Sat.hash_direccion <> Stg.[hash_direccion]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ;    \r\n \r\n   \r\n   \r\nINSERT INTO MAESTROS.LINK_CENTRO_DIRECCION \r\n    ( hash_codigo_centro,\r\n     hash_direccion,\r\n     START_DTS,\r\n     END_DTS)   \r\n   SELECT \r\n    DISTINCT hash_codigo_centro, hash_direccion , LOAD_DTS START_DTS, NULL END_DTS\r\n--INTO MAESTROS.LINK_CENTRO_DIRECCION\r\nFROM \r\n    farma.staging.hash_medicos_view    \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.LINK_CENTRO_DIRECCION \r\n   \t\t\t\tWHERE hash_codigo_centro = farma.staging.hash_medicos_view.hash_codigo_centro AND\r\n   \t\t\t    hash_direccion =farma.staging.hash_medicos_view.hash_direccion );\r\n   "
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "DV hospitales",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "DV medicos",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "-- 1. HUB_CODIGO_CENTRO\r\nINSERT INTO MAESTROS.HUB_CODIGO_CENTRO \r\n    (hash_codigo_centro, [Código de Centro Normalizado REGCESS (CCN)], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_codigo_centro, \r\n    [Código de Centro Normalizado REGCESS (CCN)], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_hospital_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_CODIGO_CENTRO WHERE hash_codigo_centro = farma.staging.hash_hospital_view.hash_codigo_centro);\r\n\r\n-- 2. HUB_TIPO_CENTRO\r\nINSERT INTO MAESTROS.HUB_TIPO_CENTRO \r\n    (hash_tipo_centro, [Tipo centro], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_tipo_centro, \r\n    [Tipo centro], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_hospital_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_CENTRO WHERE hash_tipo_centro = farma.staging.hash_hospital_view.hash_tipo_centro);\r\n\r\n-- 3. HUB_DEPENDENCIA_FUNCIONAL\r\nINSERT INTO MAESTROS.HUB_DEPENDENCIA_FUNCIONAL \r\n    (hash_dependencia_funcional, [Dependencia  Funcional], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_dependencia_funcional, \r\n    [Dependencia  Funcional], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_hospital_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_DEPENDENCIA_FUNCIONAL WHERE hash_dependencia_funcional = farma.staging.hash_hospital_view.hash_dependencia_funcional);\r\n\r\n-- 4. HUB_GRUPO_FUNCIONAL\r\nINSERT INTO MAESTROS.HUB_GRUPO_FUNCIONAL \r\n    (hash_grupo_funcional, [Grupo de dependencia  Funcional], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_grupo_funcional, \r\n    [Grupo de dependencia  Funcional], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_hospital_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_GRUPO_FUNCIONAL WHERE hash_grupo_funcional = farma.staging.hash_hospital_view.hash_grupo_funcional);\r\n\r\n-- 5. HUB_TIPO_AUTORIZACION\r\nINSERT INTO MAESTROS.HUB_TIPO_AUTORIZACION \r\n    (hash_tipo_autorizacion, [Tipo de última Autorización], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_tipo_autorizacion, \r\n    [Tipo de última Autorización], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_hospital_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_AUTORIZACION WHERE hash_tipo_autorizacion = farma.staging.hash_hospital_view.hash_tipo_autorizacion);\r\n\r\n\r\n\r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.hash_centros_view Stg \r\n       INNER JOIN MAESTROS.SAT_CENTRO Sat\r\n           ON  Sat.hash_codigo_centro      = Stg.hash_codigo_centro\r\n WHERE Sat.hash_diff <> Stg.[hash_diff]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ;    \r\n   \r\n\r\n\r\nINSERT INTO MAESTROS.SAT_CENTRO \r\n    (hash_codigo_centro, \r\n    [Nombre Centro], \r\n    [Código Comunidad Autónoma], \r\n    [Correo  Electrónico], \r\n    Fax, \r\n    Teléfono, \r\n    Url, \r\n    [Fecha Autorización  de Funcionamiento], \r\n    [Fecha de última  Autorización],\r\n     START_DTS,\r\n     END_DTS,\r\n     hash_diff)\r\nSELECT \r\n    DISTINCT hash_codigo_centro, \r\n    [Nombre Centro], \r\n    [Código Comunidad Autónoma], \r\n    [Correo  Electrónico], \r\n    Fax, \r\n    Teléfono, \r\n    Url, \r\n    [Fecha Autorización  de Funcionamiento], \r\n    [Fecha de última  Autorización],\r\n    LOAD_DTS  START_DTS,\r\n    NULL  END_DTS,\r\n    hash_diff    \r\n--INTO MAESTROS.SAT_CENTRO \r\n    FROM \r\n    farma.staging.hash_hospital_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.SAT_CENTRO WHERE hash_codigo_centro = farma.staging.hash_hospital_view.hash_codigo_centro AND hash_diff=hash_hospital_view.hash_diff);\r\n   \r\n\r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.hash_centros_view Stg \r\n       INNER JOIN MAESTROS.LINK_CENTRO_DIRECCION Sat\r\n           ON  Sat.hash_codigo_centro      = Stg.hash_codigo_centro\r\n WHERE Sat.hash_direccion <> Stg.[hash_direccion]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ;    \r\n \r\n   \r\n   \r\nINSERT INTO MAESTROS.LINK_CENTRO_DIRECCION \r\n    ( hash_codigo_centro,\r\n     hash_direccion,\r\n     START_DTS,\r\n     END_DTS)   \r\n   SELECT \r\n    DISTINCT hash_codigo_centro, hash_direccion , LOAD_DTS START_DTS, NULL END_DTS\r\n--INTO MAESTROS.LINK_CENTRO_DIRECCION\r\nFROM \r\n    farma.staging.hash_hospital_view    \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.LINK_CENTRO_DIRECCION \r\n   \t\t\t\tWHERE hash_codigo_centro = farma.staging.hash_hospital_view.hash_codigo_centro AND\r\n   \t\t\t    hash_direccion =farma.staging.hash_hospital_view.hash_direccion );\r\n \r\n"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "3 STG TO DWH"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-10-18T12:18:50Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/farma')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/99 borrar duplicados')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "borrar duplicados",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": {
+										"value": "WITH CTE AS (\n    SELECT *,\n           ROW_NUMBER() OVER(PARTITION BY {pipeline().parameters.campos} ORDER BY (SELECT NULL)) AS rn\n    FROM {pipeline().parameters.tabla}\n)\nDELETE FROM CTE WHERE rn > 1;",
+										"type": "Expression"
+									}
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"tabla": {
+						"type": "string"
+					},
+					"campos": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "99 Procesos puntuales"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-10-15T11:28:39Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/farma')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Prediccion')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Azure Function1",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "predicciones",
+							"headers": {
+								"name": "municipios"
+							},
+							"method": "GET"
+						},
+						"linkedServiceName": {
+							"referenceName": "AFAemet",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "1 Source to Data_Lake"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-04-10T11:21:36Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AFAemet')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/calculo popularidad satisfaccion')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "carga_calculo_popularidad_satisfaccion",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"bbdd": "farma"
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "\nWITH ResenasPorSemana AS (\n    SELECT \n        l.place_id,\n        DATEADD(day, -DATEPART(weekday, TRY_CONVERT(date, l.date_review)), TRY_CONVERT(date, l.date_review)) AS semana,\n        COUNT(*) AS num_resenas_semana,\n        count(review) as num_comentarios,\n        count(response) as num_respuestas,        \n        SUM(CASE s.rating WHEN '5.0' THEN 1 ELSE 0 END) AS num_resenas_5,\n        SUM(CASE s.rating WHEN '4.0' THEN 1 ELSE 0 END) AS num_resenas_4,\n        SUM(CASE s.rating WHEN '3.0' THEN 1 ELSE 0 END) AS num_resenas_3,\n        SUM(CASE s.rating WHEN '2.0' THEN 1 ELSE 0 END) AS num_resenas_2,\n        SUM(CASE s.rating WHEN '1.0' THEN 1 ELSE 0 END) AS num_resenas_1\n    FROM MAESTROS.LINK_DATOS_PLACE_REVIEWS l \n    JOIN MAESTROS.SAT_DATOS_PLACE_REVIEW_TEXTOS s \n        ON s.hash_key_review_place = l.hash_key_review_place \n        AND s.ACTIVE_RECORD_INDICATOR = 'S'\n    GROUP BY \n        l.place_id,\n        DATEADD(day, -DATEPART(weekday, TRY_CONVERT(date, l.date_review)), TRY_CONVERT(date, l.date_review) ) \n),\nRankedResenasPorSemana AS (\n    SELECT *,\n        ROW_NUMBER() OVER(PARTITION BY place_id ORDER BY num_resenas_semana DESC) AS Rank\n    FROM ResenasPorSemana\n), ResenasPorPlace as (\nSELECT\n    r.place_id,    \n    MIN(r.semana) AS desde,\n    MAX(r.semana) AS hasta,\n    TRY_CONVERT (float, DATEDIFF(week, MIN(r.semana), MAX(r.semana)) ) AS semanas_historia,\n    TRY_CONVERT (float, COUNT(DISTINCT r.semana) ) AS num_semanas_con_resenas,\n    TRY_CONVERT(FLOAT,SUM(CASE WHEN r.num_resenas_5 > 0 THEN 1 ELSE 0 END)  ) AS num_semanas_con_resenas_5,\n    TRY_CONVERT(FLOAT,SUM(CASE WHEN r.num_resenas_1 > 0 THEN 1 ELSE 0 END) ) AS num_semanas_con_resenas_1,\n    TRY_CONVERT(FLOAT,SUM(r.num_resenas_semana) ) AS num_resenas,\n    TRY_CONVERT(FLOAT,SUM(r.num_comentarios)) AS comentarios,\n    TRY_CONVERT(FLOAT, SUM(r.num_respuestas) ) AS num_respuestas,\n    SUM(TRY_CONVERT (float,r.num_resenas_5) ) AS num_resenas_5,\n    SUM(TRY_CONVERT (float,r.num_resenas_4)) AS num_resenas_4,\n    SUM(TRY_CONVERT (float,r.num_resenas_3)) AS num_resenas_3,\n    SUM(TRY_CONVERT (float,r.num_resenas_2)) AS num_resenas_2,\n    SUM(TRY_CONVERT (float,r.num_resenas_1)) AS num_resenas_1,\n    TRY_CONVERT (float, SUM(CASE WHEN r.Rank = 1 THEN r.num_resenas_semana ELSE 0 END)) AS TotalResenasEnSemanaMasResenas,\n    TRY_CONVERT (float, SUM(CASE WHEN r.Rank = 1 THEN r.num_resenas_5 ELSE 0 END) ) AS Resenas_5_EnSemanaMasResenas,\n    TRY_CONVERT (float, SUM(CASE WHEN r.Rank = 1 THEN r.num_resenas_1 ELSE 0 END) )  AS Resenas_1_EnSemanaMasResenas,\n    -- Calcular el número de semanas con reseñas en el último año\n    TRY_CONVERT(float, SUM(CASE \n        WHEN DATEDIFF(month, r.semana, GETDATE()) < 12 THEN 1\n        ELSE 0 \n    END)) AS num_semanas_con_resenas_ultimo_12_meses,\n    TRY_CONVERT(FLOAT,SUM(CASE \n        WHEN DATEDIFF(month, r.semana, GETDATE()) < 12 THEN r.num_resenas_semana\n        ELSE 0 \n    END)) AS num_resenas_ultimo_12_meses\nFROM RankedResenasPorSemana r\nGROUP BY r.place_id )\nSELECT \n\tplace_id,\n    desde,\n    hasta, \n    semanas_historia,\n    num_semanas_con_resenas semanas_con_resenas,\n    num_resenas, \n    case \n    when semanas_historia > 52 then num_semanas_con_resenas_ultimo_12_meses/52 \n    when semanas_historia > 0 then num_semanas_con_resenas_ultimo_12_meses/semanas_historia \n    else 0 end  ratio_semanas_con_resenas_ult_12m,\n    case when num_resenas >0 then num_resenas_ultimo_12_meses/num_resenas else 0 end  ratio_resenas_ult_12m,\n    case when num_resenas >0 then comentarios/num_resenas else 0 end  ratio_resenas_comentadas,\n    case when comentarios >0 then num_respuestas/comentarios else 0 end  ratio_resenas_respondidas,\n    TotalResenasEnSemanaMasResenas max_rese_semana,\n    case when num_resenas >9 then (Resenas_5_EnSemanaMasResenas+ Resenas_1_EnSemanaMasResenas) /num_resenas else 0 end ratio_manipulacion,\n    case when num_resenas >9 and (Resenas_5_EnSemanaMasResenas+ Resenas_1_EnSemanaMasResenas) >0 then Resenas_5_EnSemanaMasResenas/(Resenas_5_EnSemanaMasResenas+ Resenas_1_EnSemanaMasResenas) else 0 end ratio_manipulacion_positiva,\n    case when num_resenas >9 and (Resenas_5_EnSemanaMasResenas+ Resenas_1_EnSemanaMasResenas) >0 then Resenas_1_EnSemanaMasResenas/(Resenas_5_EnSemanaMasResenas+ Resenas_1_EnSemanaMasResenas) else 0 end ratio_manipulacion_negativa,\n    num_resenas_5*5+num_resenas_4*4+num_resenas_3*3+num_resenas_2*2+num_resenas_1 popularidad_teorica,\n    (num_resenas_5-Resenas_5_EnSemanaMasResenas) *5+num_resenas_4*4+num_resenas_3*3+num_resenas_2*2+(num_resenas_1-Resenas_1_EnSemanaMasResenas) popularidad_real,\n    case when num_resenas>0 then (num_resenas_5*5+num_resenas_4*4+num_resenas_3*3+num_resenas_2*2+num_resenas_1)/num_resenas else 0 end ranking_teorico,\n    case \n\t    when num_resenas>9 then ((num_resenas_5-Resenas_5_EnSemanaMasResenas) *5+num_resenas_4*4+num_resenas_3*3+num_resenas_2*2+(num_resenas_1-Resenas_1_EnSemanaMasResenas))/num_resenas\n\t    when  num_resenas>0 then (num_resenas_5*5+num_resenas_4*4+num_resenas_3*3+num_resenas_2*2+num_resenas_1)/num_resenas\n\t    else 0 end ranking_real,    \n\t(num_resenas_5-Resenas_5_EnSemanaMasResenas) *5+num_resenas_4*4+num_resenas_3*3-num_resenas_2*2-(num_resenas_1-Resenas_1_EnSemanaMasResenas)*5 as satisfaccion_clientes_real\n\tinto calculos.datos_place_manipulacion_review_new\n\tFROM ResenasPorPlace;\ndrop table calculos.datos_place_manipulacion_review;\n\n\nEXEC farma.sys.sp_rename N'farma.calculos.datos_place_manipulacion_review_new', N'datos_place_manipulacion_review', 'OBJECT';\n\n\n\nSELECT place_id,\n    DATEADD(day, -DATEPART(weekday, TRY_CONVERT(date, date_review)), TRY_CONVERT(date, date_review)) AS semana , count(*) num_resenas_semana,\n    sum(case s.rating when '5.0' then 1 else 0 end) num_resenas_5,\n    sum(case s.rating when '1.0' then 1 else 0 end) num_resenas_1    \ninto calculos.datos_evolucion_resenas_new\n    FROM\n    MAESTROS.LINK_DATOS_PLACE_REVIEWS l \njoin MAESTROS.SAT_DATOS_PLACE_REVIEW_TEXTOS s on s.hash_key_review_place = l.hash_key_review_place and s.ACTIVE_RECORD_INDICATOR ='S' \n   group by DATEADD(day, -DATEPART(weekday, TRY_CONVERT(date, date_review)), TRY_CONVERT(date, date_review)), place_id\n\n \n\n  \ndrop table calculos.datos_evolucion_resenas;\n\n EXEC farma.sys.sp_rename N'farma.calculos.datos_evolucion_resenas_new', N'datos_evolucion_resenas', 'OBJECT';\n   \n\n"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "4 DWH- DM"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-17T19:34:22Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/farma')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/carga calculos_datos_farmacias')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "farmacias",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"bbdd": "farma"
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "\r\nCREATE TABLE farma.calculos.datos_farmacias_2 (\r\n\thash_codigo_centro nvarchar(64) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,\r\n\tnombre_oficial nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tfecha_primera_apertura date NULL,\r\n\tfecha_ultimo_cambio_administrativo date NULL,\r\n\tdireccion_oficial nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tdireccion_normalizada nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tprecision_normalización float NULL,\r\n\tprecision_busqueda_place float NULL,\r\n\tlatitud float NULL,\r\n\tlongitud float NULL,\r\n\thorario nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\testado nvarchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tplace_id nvarchar(150) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tnombre_google nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tafluencia nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tratio_valoracion nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tcomentarios_por_ratio nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tlink_centro nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tinformacion_servicios nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tServicios_centro nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tgeo_coordenadas geography NULL\r\n\t);\r\n\r\n--TRUNCATE TABLE calculos.datos_farmacias_2;\r\n\r\n\r\n\r\nSELECT\r\nCOALESCE (s2.cod_bbdd, concat('sin_bbdd_', p.place_id)) cod_bbdd,\r\nCOALESCE (l.hash_codigo_centro, concat('sin_hash_centro_', p.place_id)) hash_codigo_centro,\r\nCOALESCE (s2.nombre_cod_bbdd , p.name) nombre_oficial,\r\np.place_id ,\r\nCOALESCE (s2.dir_normalizada_cod_farma, p.full_address) direccion_oficial,\r\nTRY_CONVERT(date, fecha_autorizacion_funcionamiento) AS   fecha_primera_apertura,\r\nTRY_CONVERT(date, fecha_ultima_autorizacion) AS  fecha_ultimo_cambio_administrativo,\r\np.full_address  direccion_normalizada,\r\ns2.semejanza_dir_place precision_normalización\r\n,(try_convert(float,s2.semejanza_dir_place) +try_convert(float,s2.semejanza_cp_place))/2  precision_busqueda_place,\r\nTRY_CONVERT(float,p.latitude) latitud,\r\nTRY_CONVERT(float,p.longitude) longitud,\r\np.working_hours horario,\r\np.business_status estado,\r\np.name  nombre_google,\r\np.popular_times afluencia,\r\np.rating ratio_valoracion,\r\np.reviews_per_score comentarios_por_ratio,\r\np.street_view link_centro,\r\np.about informacion_servicios\r\n,ser_cen.Servicios_centro\r\n--count(*) , count(DISTINCT p.place_id) , count( DISTINCT COALESCE(p.place_id, s2.cod_bbdd  , l.hash_codigo_centro  ) )\r\ninto calculos.temp_calculo_farmacias\r\nFROM farma.MAESTROS.pip_sat_place p\r\nleft  JOIN \r\n    (SELECT *, ROW_NUMBER() OVER (PARTITION BY place_id ORDER BY semejanza_dir_place DESC) as rn \r\n     FROM calculos.ranking_direcciones_normalizadas) as l ON l.place_id = p.place_id AND l.rn = 1\r\nleft JOIN \r\n    (SELECT *, ROW_NUMBER() OVER (PARTITION BY place_id ORDER BY semejanza_dir_place DESC) as rn \r\n     FROM farma.MAESTROS.sat_similitud_direcciones_cod_bbdd) as s2 ON s2.place_id = p.place_id AND s2.rn = 1\r\nleft join \r\n     MAESTROS.SAT_CENTRO_FECHAS_ADMIN s4 on s4.hash_codigo_centro= l.hash_codigo_centro and s4.ACTIVE_RECORD_INDICATOR ='S'\r\nleft join MAESTROS.referencia_ubicaciones_multicentros ser_cen on ser_cen.address_label= s2.dir_normalizada_cod_farma\r\nwhere     \"type\" IN('Pharmacy', 'Farmacia')  and TRY_CONVERT(float,p.latitude) is not null and TRY_CONVERT(float,p.longitude) is not null\r\n\r\n\r\n\r\n\r\ninsert into calculos.datos_farmacias_2 (hash_codigo_centro, nombre_oficial, fecha_primera_apertura, fecha_ultimo_cambio_administrativo, direccion_oficial, direccion_normalizada, precision_normalización, precision_busqueda_place, latitud, longitud, horario, estado,place_id, nombre_google, afluencia, ratio_valoracion, comentarios_por_ratio, link_centro, informacion_servicios, Servicios_centro, geo_coordenadas)\r\nSELECT \r\nhash_codigo_centro, nombre_oficial, fecha_primera_apertura, fecha_ultimo_cambio_administrativo, \r\ndireccion_oficial, direccion_normalizada, precision_normalización, precision_busqueda_place,\r\nlatitud, longitud, horario, estado,place_id, nombre_google, afluencia, ratio_valoracion,\r\ncomentarios_por_ratio, link_centro, informacion_servicios, Servicios_centro\r\n,geography::Point(latitud, longitud, 4326) AS geo_coordenadas\r\n--into calculos.datos_farmacias_2\r\nFROM calculos.temp_calculo_farmacias p\r\nJOIN (select DISTINCT golden_record from  MAESTROS.LINK_DUPLICADOS_PLACE_FARMACIAS L \r\njoin MAESTROS.SAT_DUPLICADOS_PLACE_FARMACIAS S ON S.key_link_deduplicados_farmas= L.key_link_deduplicados_farmas\r\nWHERE  proba_duplicado >0.55) DUP ON DUP.golden_record= p.place_id\r\nWHERE \r\n    p.latitud IS NOT NULL AND p.longitud IS NOT NULL\r\n    AND p.latitud BETWEEN -90 AND 90 AND p.longitud BETWEEN -180 AND 180\r\n;\r\nEXEC farma.sys.sp_rename N'farma.calculos.datos_farmacias', N'datos_farmacias_old', 'OBJECT';\r\nEXEC farma.sys.sp_rename N'farma.calculos.datos_farmacias_2', N'datos_farmacias', 'OBJECT';\r\n\r\ndrop table calculos.datos_farmacias_old;\r\ndrop table calculos.temp_calculo_farmacias;\r\n\r\n\r\nWITH CTE AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER(PARTITION BY hash_codigo_centro  ORDER BY (SELECT NULL)) AS rn\r\n    FROM calculos.datos_farmacias\r\n)\r\nDELETE FROM CTE WHERE rn > 1;\r\n\r\n\r\nALTER TABLE calculos.datos_farmacias ADD CONSTRAINT PK_hash_codigo_centro PRIMARY KEY CLUSTERED (hash_codigo_centro);\r\nCREATE SPATIAL INDEX idx_geoespacial_datos_farmacia ON calculos.datos_farmacias(geo_coordenadas);\r\n\r\n"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "4 DWH- DM"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-04-01T16:53:24Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/farma')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/APK2DB')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "APK2DB",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"ESQUEMA": {
+						"type": "string"
+					},
+					"TABLA": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().ESQUEMA",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TABLA",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/APK2DB')]"
+			]
+		}
+	]
+}

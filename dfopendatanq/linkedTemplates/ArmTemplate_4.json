@@ -1,0 +1,1028 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "dfopendatanq"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/5 AEMET PREDICCION_DIARIA')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "1 AEMET PREDICCION_DIARIA",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "1 AEMET PREDICCION_DIARIA",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "2 AEMET PREDICCION_DIARIA",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "1 AEMET PREDICCION_DIARIA",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "2 AEMET PREDICCION_DIARIA",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "5 Procesos Completos"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-03-14T16:52:32Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/5 PROYECTO_FARMAS_CADENAS_SEMANALES')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "2 Carga datos Sanidad",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "2 Carga datos Sanidad",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "2 Carga datos pois",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "2 Carga datos Sanidad",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "2 Carga datos pois",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "2 Rutas Sanitarias",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "2 Carga datos pois",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "2 Rutas Sanitarias",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "2 Zonas_influencia FARMAS",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "2 Carga datos pois",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "2 Zonas_influencia FARMAS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "3 datos farms a DWH",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "2 Carga datos Sanidad",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "3 datos farms a DWH",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "3 calculos entrena farmas",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "2 Zonas_influencia FARMAS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "4 calculos entrena farmas",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "5 Procesos Completos"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-10-31T15:38:24Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/5 recrea ine')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "3 DATOS INE_DEMOGRAFICOS",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "2 INE DATOS_ESTADISTICA_ESPERIMENTAL",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "3 DATOS INE_DEMOGRAFICOS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "3 DATOS INE_FUENTES_RENTA",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "3 DATOS INE_DEMOGRAFICOS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "3 DATOS INE_FUENTES_RENTA",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "3 DATOS INE_PADRON_EDAD_SEXO",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "3 DATOS INE_FUENTES_RENTA",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "3 DATOS INE_PADRON_EDAD_SEXO",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "3 DATOS INE_RENTAS_MEDIAS",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "3 DATOS INE_UMBRALES_MAX_MIN",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "3 DATOS INE_RENTAS_MEDIAS",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "3 DATOS INE_UMBRALES_MAX_MIN",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "3 DATOS INE_UMBRALES_RENTA",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "3 DATOS INE_UMBRALES_MAX_MIN",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "3 DATOS INE_UMBRALES_RENTA",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "3 DATOS INE_PADRON_EDAD_SEXO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "3 DATOS INE_UMBRALES_RENTA",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "4 carga datos seccion historicos",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "3 DATOS INE_RENTAS_MEDIAS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "4 carga datos seccion historicos",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "2 INE DATOS_ESTADISTICA_ESPERIMENTAL",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "2 INE DATOS_ESTADISTICA_ESPERIMENTAL",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "5 Procesos Completos"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-11-01T18:12:16Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/actualiza zonas_influencias')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "data_lake_to_farma_parquet",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "data_lake_to_farma_parquet",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"contenedor": "salud",
+								"directorio": "direcciones/zonas_influencia",
+								"esquema": "staging",
+								"tabla": "zonas_influencia_linial"
+							}
+						}
+					},
+					{
+						"name": "carga_ficharo_zonas_rutas",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "data_lake_to_farma_parquet",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "data_lake_to_farma_parquet",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"contenedor": "salud",
+								"directorio": "direcciones/zonas_rutas",
+								"esquema": "staging",
+								"tabla": "zonas_influencia_rutas"
+							}
+						}
+					},
+					{
+						"name": "carga_data_vault",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "carga_ficharo_zonas_rutas",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"bbdd": "farma"
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "\r\ninsert into MAESTROS.LINK_PUNTO_ZONA \r\nselect DISTINCT  key_link_punto_zona, cod_punto, hash_farmacia_cercana, TRY_CONVERT(DATE,LOAD_DTS) LOAD_DTS\r\n--into MAESTROS.LINK_PUNTO_ZONA\r\nfrom staging.zonas_influencia_rutas_hd f\r\nwhere not EXISTS (select 1 from MAESTROS.LINK_PUNTO_ZONA l where  l.key_link_punto_zona= f.key_link_punto_zona)\r\n;\r\n\r\ninsert into MAESTROS.SAT_PUNTO_ZONA\r\nselect DISTINCT  key_link_punto_zona,distancia_ruta, calles_ruta ,hash_diff_link_punto_zona, TRY_CONVERT(DATE,LOAD_DTS) EFFECTIVE_DATETIME,\r\nCAST(NULL AS DATE) EXPIRY_DATETIME,\r\n'zonas_influencia_rutas_hd' ETL_PROCESS_ID,\r\n'S' ACTIVE_RECORD_INDICATOR\r\n--into MAESTROS.SAT_PUNTO_ZONA\r\nfrom staging.zonas_influencia_rutas_hd f\r\nwhere not EXISTS (select 1 from MAESTROS.SAT_PUNTO_ZONA l where  l.key_link_punto_zona= f.key_link_punto_zona AND l.hash_diff_link_punto_zona = f.hash_diff_link_punto_zona)\r\n;\r\n\r\n\r\nWITH CTE AS (\r\n    SELECT\r\n        key_link_punto_zona,\r\n        EFFECTIVE_DATETIME,\r\n        EXPIRY_DATETIME,\r\n        ACTIVE_RECORD_INDICATOR,\r\n        ROW_NUMBER() OVER (PARTITION BY key_link_punto_zona ORDER BY EFFECTIVE_DATETIME DESC, (CASE WHEN EXPIRY_DATETIME IS NULL THEN 1 ELSE 0 END) DESC) AS rn,\r\n        MAX(EFFECTIVE_DATETIME) OVER (PARTITION BY key_link_punto_zona) AS MaxEffectiveDate\r\n    FROM\r\n        MAESTROS.SAT_PUNTO_ZONA\r\n    WHERE\r\n        EXPIRY_DATETIME IS NULL\r\n)\r\nUPDATE CTE\r\nSET\r\n    EXPIRY_DATETIME = (CASE WHEN rn = 1 THEN EXPIRY_DATETIME ELSE MaxEffectiveDate END),\r\n    ACTIVE_RECORD_INDICATOR = (CASE WHEN rn = 1 THEN 'S' ELSE 'N' END)\r\nWHERE\r\n    rn > 1 OR (rn = 1 AND ACTIVE_RECORD_INDICATOR <> 'S');"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "actualiza calculo_zonas_rutas",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "carga_data_vault",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"bbdd": "farma"
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "--crea copia temporal zonas_influencia_ruta \r\nselect cast(lpz.cod_punto  as varchar(100)) cod_punto, cast(lpz.hash_farmacia_cercana as varchar(100)) hash_farmacia_cercana , spz.distancia_ruta ,  \r\nROW_NUMBER() OVER(PARTITION BY cod_punto  ORDER BY spz.distancia_ruta ASC  ) AS posicion\r\ninto calculos.zonas_influencia_ruta_calculo_temp \r\nfrom MAESTROS.LINK_PUNTO_ZONA lpz \r\njoin MAESTROS.SAT_PUNTO_ZONA spz on spz.key_link_punto_zona = lpz.key_link_punto_zona \r\n\r\n-- inserta los registros que aun no tenemos con rutas de las zonas lineales \r\ninsert into calculos.zonas_influencia_ruta_calculo_temp\r\nselect cod_punto , hash_farmacia_cercana1 hash_farmacia_cercana , distancia_farmacia_cercana1 distancia_ruta, 1 posicion  \r\nfrom farma.calculos.zonas_influencia_calculo z\r\nwhere not EXISTS (select 1 from calculos.zonas_influencia_ruta_calculo_temp zr where zr.cod_punto = z.cod_punto)\r\n\r\ninsert into calculos.zonas_influencia_ruta_calculo_temp\r\nselect cod_punto , hash_farmacia_cercana2 hash_farmacia_cercana , distancia_farmacia_cercana2 distancia_ruta, 2 posicion  \r\nfrom farma.calculos.zonas_influencia_calculo z\r\nwhere not EXISTS (select 1 from calculos.zonas_influencia_ruta_calculo_temp zr where zr.cod_punto = z.cod_punto)\r\n\r\nDROP TABLE IF EXISTS calculos.zonas_influencia_ruta_calculo \r\n\r\nEXEC farma.sys.sp_rename N'farma.calculos.zonas_influencia_ruta_calculo_temp', N'zonas_influencia_ruta_calculo', 'OBJECT';\r\n\r\nCREATE INDEX zona_idx_cod_punto ON calculos.zonas_influencia_ruta_calculo(cod_punto);\r\nCREATE INDEX zona_idx_hash_farmacia_cercana1 ON calculos.zonas_influencia_ruta_calculo(hash_farmacia_cercana);\r\n\r\n\r\nSELECT cast(cod_punto as varchar(100)) cod_punto, Lat, lng, \r\n       cast(hash_farmacia_cercana1 as varchar(100)) hash_farmacia_cercana1, distancia_farmacia_cercana1, \r\n       cast(hash_farmacia_cercana2 as varchar(100)) hash_farmacia_cercana2, distancia_farmacia_cercana2, \r\n       cast(hash_farmacia_cercana3 as varchar(100)) hash_farmacia_cercana3, distancia_farmacia_cercana3\r\nINTO calculos.farma_calculos_temp\r\nFROM farma.calculos.zonas_influencia_calculo_hd;\r\n\r\n-- Borrar la tabla antigua\r\nDROP TABLE IF EXISTS calculos.zonas_influencia_calculo_hd_tabla;\r\n\r\n-- Cambiar el nombre de la tabla temporal al definitivo\r\nEXEC farma.sys.sp_rename N'farma.calculos.farma_calculos_temp', N'zonas_influencia_calculo_hd_tabla', 'OBJECT';\r\n\r\n\r\n-- Crear índices en la nueva tabla\r\nCREATE INDEX idx_cod_punto ON calculos.zonas_influencia_calculo_hd_tabla(cod_punto);\r\nCREATE INDEX idx_hash_farmacia_cercana1 ON calculos.zonas_influencia_calculo_hd_tabla(hash_farmacia_cercana1);\r\nCREATE INDEX idx_hash_farmacia_cercana2 ON calculos.zonas_influencia_calculo_hd_tabla(hash_farmacia_cercana2);\r\nCREATE INDEX idx_hash_farmacia_cercana3 ON calculos.zonas_influencia_calculo_hd_tabla(hash_farmacia_cercana3);\r\n\r\n\r\n\r\n\r\n"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "4 DWH- DM"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-18T10:40:44Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/carga a tabla particionada catastro')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "carga datos a la particiones",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "OdbcSink",
+								"writeBatchSize": 0
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "geo_area",
+									"tabla": "datos_coordenadas_seccion_hist"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "geo_loc",
+								"type": "DatasetReference",
+								"parameters": {
+									"tabladestino": "geo_area.datos_coordenadas_seccion_hist_01"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "99 Procesos puntuales"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-23T17:42:30Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/copia_catastro')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy catastro_fincas",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "PostgreSqlSource"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "IF OBJECT_ID('geo_area.tb_catastro_portales_nueva', 'U') IS NOT NULL\nBEGIN\n    DROP TABLE geo_area.tb_catastro_portales_nueva;\nEND\n",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "AzureBlobStorage1",
+									"type": "LinkedServiceReference"
+								},
+								"path": "catastro"
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "geol_loc",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "geo_area",
+									"tabla": "tb_catastro_portales_nueva"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "geo_area",
+									"tabla": "tb_catastro_portales_nueva"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "99 Procesos puntuales"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-06-27T16:40:54Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ejecuta_actualizacion sat_place_scraping')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "data_lake_to_farma_comas",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "data_lake_to_farma_comas",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"fichero": "backup_scraping650.csv"
+							}
+						}
+					},
+					{
+						"name": "Script1",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "data_lake_to_farma_comas",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "INSERT INTO MAESTROS.link_hash_direccion_place\r\nSELECT DISTINCT F.hash_direccion,  F.place_id,  LOAD_DTS START_DTS, NULL END_DTS\r\n--into MAESTROS.link_hash_direccion_place\r\nFROM farma.staging.pois_farmas F\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.link_hash_direccion_place L WHERE L.hash_direccion= F.hash_direccion AND L.place_id= F.place_id);\r\n\r\nWITH CTE AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER(PARTITION BY concat(hash_direccion,place_id) ORDER BY (SELECT NULL)) AS rn\r\n    FROM MAESTROS.link_hash_direccion_place\r\n)\r\nDELETE FROM CTE WHERE rn > 1;\r\n\r\nINSERT INTO MAESTROS.SAT_DATOS_PLACE_NO_VOLATILES\r\nSELECT DISTINCT place_id, name, google_id, full_address, borough, street, postal_code, area_service, country_code,\r\ncountry, city, us_state, state, plus_code, latitude, longitude, time_zone,\r\nCONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CAST(LTRIM(RTRIM(CONCAT(name, google_id, full_address, borough, street, postal_code, area_service, country_code,\r\ncountry, city, us_state, state, plus_code, latitude, longitude, time_zone))) AS NVARCHAR(100))), 2) AS hash_diff_no_volatiles,\r\nCAST(LOAD_DTS AS DATE) AS EFFECTIVE_DATETIME, CAST(NULL AS DATE) AS EXPIRY_DATETIME,\r\n'staging.pois_farmas' AS ETL_PROCESS_ID,\r\n'S' AS ACTIVE_RECORD_INDICATOR\r\n--INTO MAESTROS.SAT_DATOS_PLACE_NO_VOLATILES_2\r\nFROM staging.pois_farmas_hd f\r\nWHERE (name IS NOT NULL OR google_id IS NOT NULL OR full_address IS NOT NULL OR borough IS NOT NULL OR street IS NOT NULL OR \r\npostal_code IS NOT NULL OR area_service IS NOT NULL OR country_code IS NOT NULL OR country IS NOT NULL OR city IS NOT NULL OR \r\nus_state IS NOT NULL OR state IS NOT NULL OR plus_code IS NOT NULL OR latitude IS NOT NULL OR longitude IS NOT NULL OR time_zone IS NOT NULL)\r\nAND place_id IS NOT NULL\r\nAND NOT EXISTS (\r\n    SELECT 1 \r\n    FROM MAESTROS.SAT_DATOS_PLACE_NO_VOLATILES s \r\n    WHERE f.place_id = s.place_id \r\n    AND f.hash_diff_no_volatiles = s.hash_diff_no_volatiles\r\n);\r\n\r\nINSERT INTO MAESTROS.SAT_DATOS_PLACE_VOLATILES\r\nSELECT DISTINCT place_id, site, phone, [type], logo, description, typical_time_spent, located_in, located_google_id, \r\ncategory, subtypes, posts, photos_count, cid, reviews_link, reviews_id, photo, street_view, about, [range], \r\nreservation_links, booking_appointment_link, menu_link, order_links, owner_id,\r\nverified, owner_title, owner_link, location_link,\r\nCONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CAST(LTRIM(RTRIM(CONCAT(site, phone, [type], logo, description, typical_time_spent, located_in, located_google_id, \r\ncategory, subtypes, posts, photos_count, cid, reviews_link, reviews_id, photo, street_view, about, [range], reservation_links, booking_appointment_link, menu_link, order_links, owner_id,\r\nverified, owner_title, owner_link, location_link))) AS NVARCHAR(100))), 2) AS hash_diff_volatiles,\r\nCAST(LOAD_DTS AS DATE) AS EFFECTIVE_DATETIME, CAST(NULL AS DATE) AS EXPIRY_DATETIME,\r\n'staging.pois_farmas' AS ETL_PROCESS_ID,\r\n'S' AS ACTIVE_RECORD_INDICATOR\r\n--into MAESTROS.SAT_DATOS_PLACE_VOLATILES_2\r\nFROM staging.pois_farmas_hd f\r\nWHERE (site IS NOT NULL OR phone IS NOT NULL OR [type] IS NOT NULL OR logo IS NOT NULL OR description IS NOT NULL OR \r\ntypical_time_spent IS NOT NULL OR located_in IS NOT NULL OR located_google_id IS NOT NULL OR category IS NOT NULL OR \r\nsubtypes IS NOT NULL OR posts IS NOT NULL OR photos_count IS NOT NULL OR cid IS NOT NULL OR reviews_link IS NOT NULL OR \r\nreviews_id IS NOT NULL OR photo IS NOT NULL OR street_view IS NOT NULL OR about IS NOT NULL OR [range] IS NOT NULL OR \r\nreservation_links IS NOT NULL OR booking_appointment_link IS NOT NULL OR menu_link IS NOT NULL OR order_links IS NOT NULL OR \r\nowner_id IS NOT NULL OR verified IS NOT NULL OR owner_title IS NOT NULL OR owner_link IS NOT NULL OR location_link IS NOT NULL)\r\nAND place_id IS NOT NULL\r\nAND NOT EXISTS (\r\n    SELECT 1 \r\n    FROM MAESTROS.SAT_DATOS_PLACE_VOLATILES s \r\n    WHERE f.place_id = s.place_id \r\n    AND f.hash_diff_volatiles = s.hash_diff_volatiles\r\n);\r\n\r\n\r\nWITH CTE AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER(PARTITION BY place_id ORDER BY (SELECT NULL)) AS rn\r\n    FROM MAESTROS.SAT_DATOS_PLACE_VOLATILES\r\n)\r\nDELETE FROM CTE WHERE rn > 1;\r\n\r\nINSERT INTO MAESTROS.SAT_DATOS_PLACE_AFLUENCIA\r\nSELECT DISTINCT place_id,  popular_times,typical_time_spent,\r\nCONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CAST( LTRIM(RTRIM(concat(popular_times, typical_time_spent))) AS NVARCHAR(100))), 2) AS hash_diff_popular_time,\r\ncast(LOAD_DTS as date)  EFFECTIVE_DATETIME , CAST(NULL AS DATE) EXPIRY_DATETIME,\r\n'staging.pois_farmas' ETL_PROCESS_ID,\r\n'S' ACTIVE_RECORD_INDICATOR\r\n--INTO MAESTROS.SAT_DATOS_PLACE_AFLUENCIA\r\nFROM staging.pois_farmas_hd f\r\nWHERE popular_times IS NOT NULL and place_id is not null\r\nand NOT EXISTS (SELECT 1 FROM MAESTROS.SAT_DATOS_PLACE_AFLUENCIA s WHERE f.place_id= s.place_id and f.hash_diff_popular_time=s.hash_diff_popular_time );\r\n\r\nINSERT INTO MAESTROS.SAT_DATOS_PLACE_AFLUENCIA\r\nSELECT DISTINCT place_id,  popular_times,typical_time_spent,\r\nCONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CAST( LTRIM(RTRIM(concat(popular_times, typical_time_spent))) AS NVARCHAR(100))), 2) AS hash_diff_popular_time,\r\ncast(LOAD_DTS as date)  EFFECTIVE_DATETIME , CAST(NULL AS DATE) EXPIRY_DATETIME,\r\n'popular_time_scrapi' ETL_PROCESS_ID,\r\n'S' ACTIVE_RECORD_INDICATOR\r\n--INTO MAESTROS.SAT_DATOS_PLACE_AFLUENCIA\r\nFROM staging.popular_time_scraping_hd f\r\nWHERE popular_times IS NOT NULL and place_id is not null\r\nand NOT EXISTS (SELECT 1 FROM MAESTROS.SAT_DATOS_PLACE_AFLUENCIA s WHERE f.place_id= s.place_id and f.hash_diff_popular_time=s.hash_diff_popular_time );\r\n\r\n\r\n\r\n\r\nWITH CTE AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER(PARTITION BY concat(place_id,hash_diff_popular_time) ORDER BY (SELECT NULL)) AS rn\r\n    FROM MAESTROS.SAT_DATOS_PLACE_AFLUENCIA\r\n)\r\nDELETE FROM CTE WHERE rn > 1;\r\n\r\n\r\nINSERT INTO MAESTROS.SAT_DATOS_PLACE_REVIEWS\r\nSELECT DISTINCT place_id, rating, reviews, reviews_tags, reviews_per_score,\r\nCONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CAST(LTRIM(RTRIM(CONCAT(rating, reviews, reviews_tags, reviews_per_score))) AS NVARCHAR(100))), 2) AS hash_diff_review,\r\nCAST(LOAD_DTS AS DATE) AS EFFECTIVE_DATETIME, CAST(NULL AS DATE) AS EXPIRY_DATETIME,\r\n'staging.pois_farmas' AS ETL_PROCESS_ID,\r\n'S' AS ACTIVE_RECORD_INDICATOR\r\n--INTO MAESTROS.SAT_DATOS_PLACE_REVIEWS\r\nFROM staging.pois_farmas_hd f\r\nWHERE rating IS NOT NULL AND place_id IS NOT NULL\r\nAND NOT EXISTS (\r\n    SELECT 1 \r\n    FROM MAESTROS.SAT_DATOS_PLACE_REVIEWS s \r\n    WHERE f.place_id = s.place_id \r\n    AND f.hash_diff_review = s.hash_diff_review\r\n);\r\n\r\nINSERT INTO MAESTROS.SAT_DATOS_PLACE_HOURS\r\nSELECT DISTINCT place_id, working_hours_old_format, working_hours, other_hours, business_status,\r\nCONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CAST(LTRIM(RTRIM(CONCAT(working_hours_old_format, working_hours, other_hours, business_status))) AS NVARCHAR(100))), 2) AS hash_diff_hours,\r\nCAST(LOAD_DTS AS DATE) AS EFFECTIVE_DATETIME, CAST(NULL AS DATE) AS EXPIRY_DATETIME,\r\n'staging.pois_farmas' AS ETL_PROCESS_ID,\r\n'S' AS ACTIVE_RECORD_INDICATOR\r\n--into MAESTROS.SAT_DATOS_PLACE_HOURS\r\nFROM staging.pois_farmas_hd f--staging.pois_farmas_hd f\r\nWHERE (working_hours_old_format IS NOT NULL OR working_hours IS NOT NULL OR other_hours IS NOT NULL OR business_status IS NOT NULL)\r\nAND place_id IS NOT NULL\r\nAND NOT EXISTS (\r\n    SELECT 1 \r\n    FROM MAESTROS.SAT_DATOS_PLACE_HOURS s \r\n    WHERE f.place_id = s.place_id \r\n    AND f.hash_diff_hours = s.hash_diff_hours\r\n);\r\n\r\n\r\n"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "99 Procesos puntuales"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-12-15T16:34:03Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DIARIO')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "5 AEMET OBSERVACION_DIARIA",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-11-28T18:29:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"hours": [
+								20
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PREDICCION_AEMET')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "5 AEMET PREDICCION_DIARIA",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-02-20T11:42:00",
+						"timeZone": "Romance Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								0
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/5 AEMET PREDICCION_DIARIA')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/todas las noches a las 2')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "actualiza zonas_influencias",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2024-03-17T17:38:00",
+						"endTime": "2024-03-23T17:38:00",
+						"timeZone": "Romance Standard Time",
+						"schedule": {
+							"minutes": [
+								0
+							],
+							"hours": [
+								2
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/actualiza zonas_influencias')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger1')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "copia_catastro",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "2 Rutas Sanitarias",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "5 recrea ine",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-10-19T08:11:00",
+						"endTime": "2023-10-26T17:11:00",
+						"timeZone": "Romance Standard Time",
+						"schedule": {
+							"minutes": [
+								55
+							],
+							"hours": [
+								23
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/copia_catastro')]",
+				"[concat(variables('factoryId'), '/pipelines/5 recrea ine')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger2')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "carga a tabla particionada catastro",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2023-05-23T17:39:00",
+						"endTime": "2023-05-24T17:39:00",
+						"timeZone": "Romance Standard Time",
+						"schedule": {
+							"minutes": [
+								50
+							],
+							"hours": [
+								23
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/carga a tabla particionada catastro')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger3')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "ejecuta_actualizacion sat_place_scraping",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Hour",
+						"interval": 24,
+						"startTime": "2023-11-30T07:57:00",
+						"endTime": "2023-11-30T18:57:00",
+						"timeZone": "Romance Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/ejecuta_actualizacion sat_place_scraping')]"
+			]
+		}
+	]
+}

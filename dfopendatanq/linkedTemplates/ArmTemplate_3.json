@@ -1,0 +1,2756 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "dfopendatanq"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/4 carga datos seccion historicos')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CREA DATOS_SECCION_HISTORICO",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT  \r\nhs.Cod_Secciones seccioncensal,\r\nl.anno ,\r\navg(CASE WHEN hm.metrica='Tamaño medio del hogar' THEN l.valor_metrica  END) \"Tamaño medio del hogar\",\r\navg(CASE WHEN hm.metrica='Media de la renta por unidad de consumo' THEN l.valor_metrica  END) \"Media de la renta por unidad de consumo\",\r\navg(CASE WHEN hm.metrica='Mediana de la renta por unidad de consumo' THEN l.valor_metrica  END) \"Mediana de la renta por unidad de consumo\",\r\navg(CASE WHEN hm.metrica='Renta bruta media por hogar' THEN l.valor_metrica  END) \"Renta bruta media por hogar\",\r\navg(CASE WHEN hm.metrica='Renta bruta media por persona' THEN l.valor_metrica  END) \"Renta bruta media por persona\",\r\navg(CASE WHEN hm.metrica='Renta neta media por hogar' THEN l.valor_metrica  END) \"Renta neta media por hogar\",\r\navg(CASE WHEN hm.metrica='Renta neta media por persona ' THEN l.valor_metrica  END) \"Renta neta media por persona \",\r\navg(CASE WHEN hm.metrica='Fuente de ingreso: otras prestaciones' THEN l.valor_metrica  END) \"Fuente de ingreso: otras prestaciones\",\r\navg(CASE WHEN hm.metrica='Fuente de ingreso: otros ingresos' THEN l.valor_metrica  END) \"Fuente de ingreso: otros ingresos\",\r\navg(CASE WHEN hm.metrica='Fuente de ingreso: pensiones' THEN l.valor_metrica  END) \"Fuente de ingreso: pensiones\",\r\navg(CASE WHEN hm.metrica='Fuente de ingreso: prestaciones por desempleo' THEN l.valor_metrica  END) \"Fuente de ingreso: prestaciones por desempleo\",\r\navg(CASE WHEN hm.metrica='Fuente de ingreso: salario' THEN l.valor_metrica  END) \"Fuente de ingreso: salario\",\r\navg(CASE WHEN hm.metrica='Población con ingresos por unidad de consumo por debajo de 10.000 Euros' THEN l.valor_metrica  END) \"Población con ingresos por unidad de consumo por debajo de 10.000 Euros\",\r\navg(CASE WHEN hm.metrica='Población con ingresos por unidad de consumo por debajo de 5.000 Euros' THEN l.valor_metrica  END) \"Población con ingresos por unidad de consumo por debajo de 5.000 Euros\",\r\navg(CASE WHEN hm.metrica='Población con ingresos por unidad de consumo por debajo de 7.500 Euros' THEN l.valor_metrica  END) \"Población con ingresos por unidad de consumo por debajo de 7.500 Euros\",\r\navg(CASE WHEN hm.metrica='Población con ingresos por unidad de consumo por debajo 40% de la mediana' THEN l.valor_metrica  END) \"Población con ingresos por unidad de consumo por debajo 40% de la mediana\",\r\navg(CASE WHEN hm.metrica='Población con ingresos por unidad de consumo por debajo 50% de la mediana' THEN l.valor_metrica  END) \"Población con ingresos por unidad de consumo por debajo 50% de la mediana\",\r\navg(CASE WHEN hm.metrica='Población con ingresos por unidad de consumo por debajo 60% de la mediana' THEN l.valor_metrica  END) \"Población con ingresos por unidad de consumo por debajo 60% de la mediana\",\r\navg(CASE WHEN hm.metrica='Población con ingresos por unidad de consumo por encima 140% de la mediana' THEN l.valor_metrica  END) \"Población con ingresos por unidad de consumo por encima 140% de la mediana\",\r\navg(CASE WHEN hm.metrica='Población con ingresos por unidad de consumo por encima 160% de la mediana' THEN l.valor_metrica  END) \"Población con ingresos por unidad de consumo por encima 160% de la mediana\",\r\navg(CASE WHEN hm.metrica='Población con ingresos por unidad de consumo por encima 200% de la mediana' THEN l.valor_metrica  END) \"Población con ingresos por unidad de consumo por encima 200% de la mediana\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_0-4' THEN l.valor_metrica  END) \"Ambos Sexos_0-4\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_100 y más' THEN l.valor_metrica  END) \"Ambos Sexos_100 y más\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_10-14' THEN l.valor_metrica  END) \"Ambos Sexos_10-14\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_15-19' THEN l.valor_metrica  END) \"Ambos Sexos_15-19\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_20-24' THEN l.valor_metrica  END) \"Ambos Sexos_20-24\",\r\navg(CASE WHEN hm.metrica='Edad media de la población' THEN l.valor_metrica  END) \"Edad media de la población\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_25-29' THEN l.valor_metrica  END) \"Ambos Sexos_25-29\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_30-34' THEN l.valor_metrica  END) \"Ambos Sexos_30-34\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_35-39' THEN l.valor_metrica  END) \"Ambos Sexos_35-39\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_40-44' THEN l.valor_metrica  END) \"Ambos Sexos_40-44\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_45-49' THEN l.valor_metrica  END) \"Ambos Sexos_45-49\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_50-54' THEN l.valor_metrica  END) \"Ambos Sexos_50-54\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_55-59' THEN l.valor_metrica  END) \"Ambos Sexos_55-59\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_5-9' THEN l.valor_metrica  END) \"Ambos Sexos_5-9\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_60-64' THEN l.valor_metrica  END) \"Ambos Sexos_60-64\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_65-69' THEN l.valor_metrica  END) \"Ambos Sexos_65-69\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_70-74' THEN l.valor_metrica  END) \"Ambos Sexos_70-74\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_75-79' THEN l.valor_metrica  END) \"Ambos Sexos_75-79\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_80-84' THEN l.valor_metrica  END) \"Ambos Sexos_80-84\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_85-89' THEN l.valor_metrica  END) \"Ambos Sexos_85-89\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_90-94' THEN l.valor_metrica  END) \"Ambos Sexos_90-94\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_95-99' THEN l.valor_metrica  END) \"Ambos Sexos_95-99\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Total' THEN l.valor_metrica  END) \"Ambos Sexos_Total\",\r\navg(CASE WHEN hm.metrica='Hombres_0-4' THEN l.valor_metrica  END) \"Hombres_0-4\",\r\navg(CASE WHEN hm.metrica='Hombres_100 y más' THEN l.valor_metrica  END) \"Hombres_100 y más\",\r\navg(CASE WHEN hm.metrica='Hombres_10-14' THEN l.valor_metrica  END) \"Hombres_10-14\",\r\navg(CASE WHEN hm.metrica='Hombres_15-19' THEN l.valor_metrica  END) \"Hombres_15-19\",\r\navg(CASE WHEN hm.metrica='Hombres_20-24' THEN l.valor_metrica  END) \"Hombres_20-24\",\r\navg(CASE WHEN hm.metrica='Hombres_25-29' THEN l.valor_metrica  END) \"Hombres_25-29\",\r\navg(CASE WHEN hm.metrica='Hombres_30-34' THEN l.valor_metrica  END) \"Hombres_30-34\",\r\navg(CASE WHEN hm.metrica='Hombres_35-39' THEN l.valor_metrica  END) \"Hombres_35-39\",\r\navg(CASE WHEN hm.metrica='Hombres_40-44' THEN l.valor_metrica  END) \"Hombres_40-44\",\r\navg(CASE WHEN hm.metrica='Hombres_45-49' THEN l.valor_metrica  END) \"Hombres_45-49\",\r\navg(CASE WHEN hm.metrica='Hombres_50-54' THEN l.valor_metrica  END) \"Hombres_50-54\",\r\navg(CASE WHEN hm.metrica='Hombres_55-59' THEN l.valor_metrica  END) \"Hombres_55-59\",\r\navg(CASE WHEN hm.metrica='Hombres_5-9' THEN l.valor_metrica  END) \"Hombres_5-9\",\r\navg(CASE WHEN hm.metrica='Hombres_60-64' THEN l.valor_metrica  END) \"Hombres_60-64\",\r\navg(CASE WHEN hm.metrica='Hombres_65-69' THEN l.valor_metrica  END) \"Hombres_65-69\",\r\navg(CASE WHEN hm.metrica='Hombres_70-74' THEN l.valor_metrica  END) \"Hombres_70-74\",\r\navg(CASE WHEN hm.metrica='Hombres_75-79' THEN l.valor_metrica  END) \"Hombres_75-79\",\r\navg(CASE WHEN hm.metrica='Porcentaje de hogares unipersonales' THEN l.valor_metrica  END) \"Porcentaje de hogares unipersonales\",\r\navg(CASE WHEN hm.metrica='Porcentaje de población menor de 18 años' THEN l.valor_metrica  END) \"Porcentaje de población menor de 18 años\",\r\navg(CASE WHEN hm.metrica='Hombres_80-84' THEN l.valor_metrica  END) \"Hombres_80-84\",\r\navg(CASE WHEN hm.metrica='Hombres_85-89' THEN l.valor_metrica  END) \"Hombres_85-89\",\r\navg(CASE WHEN hm.metrica='Hombres_90-94' THEN l.valor_metrica  END) \"Hombres_90-94\",\r\navg(CASE WHEN hm.metrica='Hombres_95-99' THEN l.valor_metrica  END) \"Hombres_95-99\",\r\navg(CASE WHEN hm.metrica='Hombres_Total' THEN l.valor_metrica  END) \"Hombres_Total\",\r\navg(CASE WHEN hm.metrica='Mujeres_0-4' THEN l.valor_metrica  END) \"Mujeres_0-4\",\r\navg(CASE WHEN hm.metrica='Mujeres_100 y más' THEN l.valor_metrica  END) \"Mujeres_100 y más\",\r\navg(CASE WHEN hm.metrica='Mujeres_10-14' THEN l.valor_metrica  END) \"Mujeres_10-14\",\r\navg(CASE WHEN hm.metrica='Mujeres_15-19' THEN l.valor_metrica  END) \"Mujeres_15-19\",\r\navg(CASE WHEN hm.metrica='Mujeres_20-24' THEN l.valor_metrica  END) \"Mujeres_20-24\",\r\navg(CASE WHEN hm.metrica='Mujeres_25-29' THEN l.valor_metrica  END) \"Mujeres_25-29\",\r\navg(CASE WHEN hm.metrica='Mujeres_30-34' THEN l.valor_metrica  END) \"Mujeres_30-34\",\r\navg(CASE WHEN hm.metrica='Mujeres_35-39' THEN l.valor_metrica  END) \"Mujeres_35-39\",\r\navg(CASE WHEN hm.metrica='Mujeres_40-44' THEN l.valor_metrica  END) \"Mujeres_40-44\",\r\navg(CASE WHEN hm.metrica='Mujeres_45-49' THEN l.valor_metrica  END) \"Mujeres_45-49\",\r\navg(CASE WHEN hm.metrica='Mujeres_50-54' THEN l.valor_metrica  END) \"Mujeres_50-54\",\r\navg(CASE WHEN hm.metrica='Mujeres_55-59' THEN l.valor_metrica  END) \"Mujeres_55-59\",\r\navg(CASE WHEN hm.metrica='Mujeres_5-9' THEN l.valor_metrica  END) \"Mujeres_5-9\",\r\navg(CASE WHEN hm.metrica='Mujeres_60-64' THEN l.valor_metrica  END) \"Mujeres_60-64\",\r\navg(CASE WHEN hm.metrica='Mujeres_65-69' THEN l.valor_metrica  END) \"Mujeres_65-69\",\r\navg(CASE WHEN hm.metrica='Mujeres_70-74' THEN l.valor_metrica  END) \"Mujeres_70-74\",\r\navg(CASE WHEN hm.metrica='Mujeres_75-79' THEN l.valor_metrica  END) \"Mujeres_75-79\",\r\navg(CASE WHEN hm.metrica='Mujeres_80-84' THEN l.valor_metrica  END) \"Mujeres_80-84\",\r\navg(CASE WHEN hm.metrica='Mujeres_85-89' THEN l.valor_metrica  END) \"Mujeres_85-89\",\r\navg(CASE WHEN hm.metrica='Mujeres_90-94' THEN l.valor_metrica  END) \"Mujeres_90-94\",\r\navg(CASE WHEN hm.metrica='Mujeres_95-99' THEN l.valor_metrica  END) \"Mujeres_95-99\",\r\navg(CASE WHEN hm.metrica='Mujeres_Total' THEN l.valor_metrica  END) \"Mujeres_Total\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Perú' THEN l.valor_metrica  END) \"Ambos Sexos_Perú\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Total Oceanía' THEN l.valor_metrica  END) \"Ambos Sexos_Total Oceanía\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Total Resto de Europa' THEN l.valor_metrica  END) \"Ambos Sexos_Total Resto de Europa\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Total Unión Europea' THEN l.valor_metrica  END) \"Ambos Sexos_Total Unión Europea\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Venezuela' THEN l.valor_metrica  END) \"Ambos Sexos_Venezuela\",\r\navg(CASE WHEN hm.metrica='Población' THEN l.valor_metrica  END) \"Población\",\r\navg(CASE WHEN hm.metrica='Porcentaje de población española' THEN l.valor_metrica  END) \"Porcentaje de población española\",\r\navg(CASE WHEN hm.metrica='Hombres_Argelia' THEN l.valor_metrica  END) \"Hombres_Argelia\",\r\navg(CASE WHEN hm.metrica='Hombres_Total América' THEN l.valor_metrica  END) \"Hombres_Total América\",\r\navg(CASE WHEN hm.metrica='Mujeres_Francia' THEN l.valor_metrica  END) \"Mujeres_Francia\",\r\navg(CASE WHEN hm.metrica='Mujeres_Pakistán' THEN l.valor_metrica  END) \"Mujeres_Pakistán\",\r\navg(CASE WHEN hm.metrica='Mujeres_Portugal' THEN l.valor_metrica  END) \"Mujeres_Portugal\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Colombia' THEN l.valor_metrica  END) \"Ambos Sexos_Colombia\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Nacidos en España' THEN l.valor_metrica  END) \"Ambos Sexos_Nacidos en España\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Paraguay' THEN l.valor_metrica  END) \"Ambos Sexos_Paraguay\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Rusia' THEN l.valor_metrica  END) \"Ambos Sexos_Rusia\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Uruguay' THEN l.valor_metrica  END) \"Ambos Sexos_Uruguay\",\r\navg(CASE WHEN hm.metrica='Hombres_Bolivia' THEN l.valor_metrica  END) \"Hombres_Bolivia\",\r\navg(CASE WHEN hm.metrica='Hombres_Bulgaria' THEN l.valor_metrica  END) \"Hombres_Bulgaria\",\r\navg(CASE WHEN hm.metrica='Hombres_China' THEN l.valor_metrica  END) \"Hombres_China\",\r\navg(CASE WHEN hm.metrica='Hombres_Colombia' THEN l.valor_metrica  END) \"Hombres_Colombia\",\r\navg(CASE WHEN hm.metrica='Hombres_Marruecos' THEN l.valor_metrica  END) \"Hombres_Marruecos\",\r\navg(CASE WHEN hm.metrica='Hombres_Total Oceanía' THEN l.valor_metrica  END) \"Hombres_Total Oceanía\",\r\navg(CASE WHEN hm.metrica='Mujeres_Bolivia' THEN l.valor_metrica  END) \"Mujeres_Bolivia\",\r\navg(CASE WHEN hm.metrica='Mujeres_Ecuador' THEN l.valor_metrica  END) \"Mujeres_Ecuador\",\r\navg(CASE WHEN hm.metrica='Mujeres_Reino Unido' THEN l.valor_metrica  END) \"Mujeres_Reino Unido\",\r\navg(CASE WHEN hm.metrica='Mujeres_Senegal' THEN l.valor_metrica  END) \"Mujeres_Senegal\",\r\navg(CASE WHEN hm.metrica='Mujeres_Total Africa' THEN l.valor_metrica  END) \"Mujeres_Total Africa\",\r\navg(CASE WHEN hm.metrica='Mujeres_Uruguay' THEN l.valor_metrica  END) \"Mujeres_Uruguay\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Marruecos' THEN l.valor_metrica  END) \"Ambos Sexos_Marruecos\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Pakistán' THEN l.valor_metrica  END) \"Ambos Sexos_Pakistán\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Total Asia' THEN l.valor_metrica  END) \"Ambos Sexos_Total Asia\",\r\navg(CASE WHEN hm.metrica='Hombres_Brasil' THEN l.valor_metrica  END) \"Hombres_Brasil\",\r\navg(CASE WHEN hm.metrica='Hombres_Ecuador' THEN l.valor_metrica  END) \"Hombres_Ecuador\",\r\navg(CASE WHEN hm.metrica='Hombres_Nacidos en el Extranjero' THEN l.valor_metrica  END) \"Hombres_Nacidos en el Extranjero\",\r\navg(CASE WHEN hm.metrica='Hombres_Nigeria' THEN l.valor_metrica  END) \"Hombres_Nigeria\",\r\navg(CASE WHEN hm.metrica='Porcentaje de población de 65 y más años' THEN l.valor_metrica  END) \"Porcentaje de población de 65 y más años\",\r\navg(CASE WHEN hm.metrica='Hombres_Senegal' THEN l.valor_metrica  END) \"Hombres_Senegal\",\r\navg(CASE WHEN hm.metrica='Hombres_Total Africa' THEN l.valor_metrica  END) \"Hombres_Total Africa\",\r\navg(CASE WHEN hm.metrica='Hombres_Total Asia' THEN l.valor_metrica  END) \"Hombres_Total Asia\",\r\navg(CASE WHEN hm.metrica='Mujeres_Argelia' THEN l.valor_metrica  END) \"Mujeres_Argelia\",\r\navg(CASE WHEN hm.metrica='Mujeres_China' THEN l.valor_metrica  END) \"Mujeres_China\",\r\navg(CASE WHEN hm.metrica='Mujeres_Cuba' THEN l.valor_metrica  END) \"Mujeres_Cuba\",\r\navg(CASE WHEN hm.metrica='Mujeres_Marruecos' THEN l.valor_metrica  END) \"Mujeres_Marruecos\",\r\navg(CASE WHEN hm.metrica='Mujeres_Nacidos en España' THEN l.valor_metrica  END) \"Mujeres_Nacidos en España\",\r\navg(CASE WHEN hm.metrica='Mujeres_Nigeria' THEN l.valor_metrica  END) \"Mujeres_Nigeria\",\r\navg(CASE WHEN hm.metrica='Mujeres_Paraguay' THEN l.valor_metrica  END) \"Mujeres_Paraguay\",\r\navg(CASE WHEN hm.metrica='Mujeres_Ucrania' THEN l.valor_metrica  END) \"Mujeres_Ucrania\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Alemania' THEN l.valor_metrica  END) \"Ambos Sexos_Alemania\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Argelia' THEN l.valor_metrica  END) \"Ambos Sexos_Argelia\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Argentina' THEN l.valor_metrica  END) \"Ambos Sexos_Argentina\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Bolivia' THEN l.valor_metrica  END) \"Ambos Sexos_Bolivia\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Brasil' THEN l.valor_metrica  END) \"Ambos Sexos_Brasil\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_China' THEN l.valor_metrica  END) \"Ambos Sexos_China\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Portugal' THEN l.valor_metrica  END) \"Ambos Sexos_Portugal\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Reino Unido' THEN l.valor_metrica  END) \"Ambos Sexos_Reino Unido\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Total Población' THEN l.valor_metrica  END) \"Ambos Sexos_Total Población\",\r\navg(CASE WHEN hm.metrica='Hombres_Italia' THEN l.valor_metrica  END) \"Hombres_Italia\",\r\navg(CASE WHEN hm.metrica='Hombres_Pakistán' THEN l.valor_metrica  END) \"Hombres_Pakistán\",\r\navg(CASE WHEN hm.metrica='Hombres_Polonia' THEN l.valor_metrica  END) \"Hombres_Polonia\",\r\navg(CASE WHEN hm.metrica='Hombres_Reino Unido' THEN l.valor_metrica  END) \"Hombres_Reino Unido\",\r\navg(CASE WHEN hm.metrica='Hombres_República Dominicana' THEN l.valor_metrica  END) \"Hombres_República Dominicana\",\r\navg(CASE WHEN hm.metrica='Hombres_Rumanía' THEN l.valor_metrica  END) \"Hombres_Rumanía\",\r\navg(CASE WHEN hm.metrica='Hombres_Total Población' THEN l.valor_metrica  END) \"Hombres_Total Población\",\r\navg(CASE WHEN hm.metrica='Mujeres_Chile' THEN l.valor_metrica  END) \"Mujeres_Chile\",\r\navg(CASE WHEN hm.metrica='Mujeres_Colombia' THEN l.valor_metrica  END) \"Mujeres_Colombia\",\r\navg(CASE WHEN hm.metrica='Mujeres_Italia' THEN l.valor_metrica  END) \"Mujeres_Italia\",\r\navg(CASE WHEN hm.metrica='Mujeres_Nacidos en el Extranjero' THEN l.valor_metrica  END) \"Mujeres_Nacidos en el Extranjero\",\r\navg(CASE WHEN hm.metrica='Mujeres_Perú' THEN l.valor_metrica  END) \"Mujeres_Perú\",\r\navg(CASE WHEN hm.metrica='Mujeres_Polonia' THEN l.valor_metrica  END) \"Mujeres_Polonia\",\r\navg(CASE WHEN hm.metrica='Mujeres_Total Asia' THEN l.valor_metrica  END) \"Mujeres_Total Asia\",\r\navg(CASE WHEN hm.metrica='Mujeres_Total Europa No Comunitaria' THEN l.valor_metrica  END) \"Mujeres_Total Europa No Comunitaria\",\r\navg(CASE WHEN hm.metrica='Mujeres_Total Población' THEN l.valor_metrica  END) \"Mujeres_Total Población\",\r\navg(CASE WHEN hm.metrica='Mujeres_Venezuela' THEN l.valor_metrica  END) \"Mujeres_Venezuela\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Cuba' THEN l.valor_metrica  END) \"Ambos Sexos_Cuba\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Francia' THEN l.valor_metrica  END) \"Ambos Sexos_Francia\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Nigeria' THEN l.valor_metrica  END) \"Ambos Sexos_Nigeria\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_República Dominicana' THEN l.valor_metrica  END) \"Ambos Sexos_República Dominicana\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Senegal' THEN l.valor_metrica  END) \"Ambos Sexos_Senegal\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Total Africa' THEN l.valor_metrica  END) \"Ambos Sexos_Total Africa\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Total África' THEN l.valor_metrica  END) \"Ambos Sexos_Total África\",\r\navg(CASE WHEN hm.metrica='Hombres_Alemania' THEN l.valor_metrica  END) \"Hombres_Alemania\",\r\navg(CASE WHEN hm.metrica='Hombres_Cuba' THEN l.valor_metrica  END) \"Hombres_Cuba\",\r\navg(CASE WHEN hm.metrica='Hombres_Nacidos en España' THEN l.valor_metrica  END) \"Hombres_Nacidos en España\",\r\navg(CASE WHEN hm.metrica='Hombres_Paraguay' THEN l.valor_metrica  END) \"Hombres_Paraguay\",\r\navg(CASE WHEN hm.metrica='Hombres_Portugal' THEN l.valor_metrica  END) \"Hombres_Portugal\",\r\navg(CASE WHEN hm.metrica='Hombres_Rusia' THEN l.valor_metrica  END) \"Hombres_Rusia\",\r\navg(CASE WHEN hm.metrica='Hombres_Total Resto de Europa' THEN l.valor_metrica  END) \"Hombres_Total Resto de Europa\",\r\navg(CASE WHEN hm.metrica='Hombres_Total Unión Europea' THEN l.valor_metrica  END) \"Hombres_Total Unión Europea\",\r\navg(CASE WHEN hm.metrica='Hombres_Ucrania' THEN l.valor_metrica  END) \"Hombres_Ucrania\",\r\navg(CASE WHEN hm.metrica='Hombres_Uruguay' THEN l.valor_metrica  END) \"Hombres_Uruguay\",\r\navg(CASE WHEN hm.metrica='Hombres_Venezuela' THEN l.valor_metrica  END) \"Hombres_Venezuela\",\r\navg(CASE WHEN hm.metrica='Mujeres_Brasil' THEN l.valor_metrica  END) \"Mujeres_Brasil\",\r\navg(CASE WHEN hm.metrica='Mujeres_Rumanía' THEN l.valor_metrica  END) \"Mujeres_Rumanía\",\r\navg(CASE WHEN hm.metrica='Mujeres_Rusia' THEN l.valor_metrica  END) \"Mujeres_Rusia\",\r\navg(CASE WHEN hm.metrica='Mujeres_Total África' THEN l.valor_metrica  END) \"Mujeres_Total África\",\r\navg(CASE WHEN hm.metrica='Mujeres_Total Resto de Europa' THEN l.valor_metrica  END) \"Mujeres_Total Resto de Europa\",\r\navg(CASE WHEN hm.metrica='Mujeres_Total Unión Europea' THEN l.valor_metrica  END) \"Mujeres_Total Unión Europea\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Bulgaria' THEN l.valor_metrica  END) \"Ambos Sexos_Bulgaria\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Chile' THEN l.valor_metrica  END) \"Ambos Sexos_Chile\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Ecuador' THEN l.valor_metrica  END) \"Ambos Sexos_Ecuador\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Italia' THEN l.valor_metrica  END) \"Ambos Sexos_Italia\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Nacidos en el Extranjero' THEN l.valor_metrica  END) \"Ambos Sexos_Nacidos en el Extranjero\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Polonia' THEN l.valor_metrica  END) \"Ambos Sexos_Polonia\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Rumanía' THEN l.valor_metrica  END) \"Ambos Sexos_Rumanía\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Total América' THEN l.valor_metrica  END) \"Ambos Sexos_Total América\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Total Europa No Comunitaria' THEN l.valor_metrica  END) \"Ambos Sexos_Total Europa No Comunitaria\",\r\navg(CASE WHEN hm.metrica='Ambos Sexos_Ucrania' THEN l.valor_metrica  END) \"Ambos Sexos_Ucrania\",\r\navg(CASE WHEN hm.metrica='Hombres_Argentina' THEN l.valor_metrica  END) \"Hombres_Argentina\",\r\navg(CASE WHEN hm.metrica='Hombres_Chile' THEN l.valor_metrica  END) \"Hombres_Chile\",\r\navg(CASE WHEN hm.metrica='Hombres_Francia' THEN l.valor_metrica  END) \"Hombres_Francia\",\r\navg(CASE WHEN hm.metrica='Hombres_Perú' THEN l.valor_metrica  END) \"Hombres_Perú\",\r\navg(CASE WHEN hm.metrica='Hombres_Total Europa No Comunitaria' THEN l.valor_metrica  END) \"Hombres_Total Europa No Comunitaria\",\r\navg(CASE WHEN hm.metrica='Mujeres_Alemania' THEN l.valor_metrica  END) \"Mujeres_Alemania\",\r\navg(CASE WHEN hm.metrica='Mujeres_Argentina' THEN l.valor_metrica  END) \"Mujeres_Argentina\",\r\navg(CASE WHEN hm.metrica='Mujeres_Bulgaria' THEN l.valor_metrica  END) \"Mujeres_Bulgaria\",\r\navg(CASE WHEN hm.metrica='Mujeres_República Dominicana' THEN l.valor_metrica  END) \"Mujeres_República Dominicana\",\r\navg(CASE WHEN hm.metrica='Mujeres_Total América' THEN l.valor_metrica  END) \"Mujeres_Total América\",\r\navg(CASE WHEN hm.metrica='Mujeres_Total Oceanía' THEN l.valor_metrica  END) \"Mujeres_Total Oceanía\"\r\n--INTO open_data.geo_area.datos_secciones_historico\r\nFROM open_data.INE.LINK_DATOS_NIVEL_SECCION_METRICA_ANNO l\r\njoin INE.HUB_METRICA hm on hm.metrica_KEY = l.metrica_KEY\r\njoin INE.HUB_SECCIONES hs on hs.Secciones_KEY = l.Secciones_KEY \r\ngroup by hs.Cod_Secciones ,l.anno;\r\n",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "truncate table geo_area.datos_secciones_historico",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "geo_area",
+									"tabla": "datos_secciones_historico"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "4 DWH- DM"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-11-02T09:47:14Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/5 AEMET OBSERVACION_HISTORICA')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "peticion_url_obserbaciones",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "GET",
+							"headers": {
+								"api_key": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWNhcmRvLmNhbWFjaG9Abm92YXF1YWxpdHkuZXMiLCJqdGkiOiIxMjljNWQzYS1jZWFlLTQ5ZWYtODQ2OS05ZmJjZjY5YzIyMTUiLCJpc3MiOiJBRU1FVCIsImlhdCI6MTY2OTE4NjA4NywidXNlcklkIjoiMTI5YzVkM2EtY2VhZS00OWVmLTg0NjktOWZiY2Y2OWMyMjE1Iiwicm9sZSI6IiJ9.xtPVH8hEwLGRCmyL8Xccv7s2bNVB-wbVL7XSOP1VipM",
+								"cache-control": "no-cache"
+							},
+							"url": "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2023-03-01T00:00:00UTC/fechafin/2023-03-13T23:59:59UTC/todasestaciones"
+						}
+					},
+					{
+						"name": "copia_observacion_diaria",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "peticion_url_obserbaciones",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DATE",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "REC_SRC",
+										"value": "'https://opendata.aemet.es/opendata/api/observacion/convencional/todas'"
+									}
+								],
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "scr_aemet",
+								"type": "DatasetReference",
+								"parameters": {
+									"url_datos_aemet": {
+										"value": "@activity('peticion_url_obserbaciones').output.datos",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "STG",
+									"tabla": "AEMET_OBSERVACION_ESTACION_DIA"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "5 Procesos Completos"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-11T08:14:19Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/99 AEMET OBSERACIONES_HISTORICAS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Azure Function1",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "predicciones",
+							"headers": {
+								"name": "historico"
+							},
+							"method": "GET"
+						},
+						"linkedServiceName": {
+							"referenceName": "AFAemet",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Azure Function1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AvroSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Avro1",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": "historicos",
+									"fichero": "historicos"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "STG",
+									"tabla": "AEMET_HISTORICOS"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "99 Procesos puntuales"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-04-10T11:21:36Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/99 AEMET OBSERVACION_DIARIA_ESTACIONES')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Pipeline para descarga puntual de observaciones dirarias. Las fechas en formato YYYY-MM-DD y una ventana de no mas de 30 días.",
+				"activities": [
+					{
+						"name": "peticion_url_obserbaciones",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Fecha Inicio",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "Fecha Fin",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "GET",
+							"headers": {
+								"api_key": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWNhcmRvLmNhbWFjaG9Abm92YXF1YWxpdHkuZXMiLCJqdGkiOiIxMjljNWQzYS1jZWFlLTQ5ZWYtODQ2OS05ZmJjZjY5YzIyMTUiLCJpc3MiOiJBRU1FVCIsImlhdCI6MTY2OTE4NjA4NywidXNlcklkIjoiMTI5YzVkM2EtY2VhZS00OWVmLTg0NjktOWZiY2Y2OWMyMjE1Iiwicm9sZSI6IiJ9.xtPVH8hEwLGRCmyL8Xccv7s2bNVB-wbVL7XSOP1VipM",
+								"cache-control": "no-cache"
+							},
+							"url": {
+								"value": "@concat('https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/',variables('fec_ini_var'),'/fechafin/',variables('fec_fin_var'),'/todasestaciones')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "copia_observacion_diaria",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "peticion_url_obserbaciones",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DATE",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "REC_SRC",
+										"value": "'https://opendata.aemet.es/opendata/api/observacion/convencional/todas'"
+									}
+								],
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "scr_aemet",
+								"type": "DatasetReference",
+								"parameters": {
+									"url_datos_aemet": {
+										"value": "@activity('peticion_url_obserbaciones').output.datos",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "STG",
+									"tabla": "AEMET_OBSERVACION_ESTACION_DIA"
+								}
+							}
+						]
+					},
+					{
+						"name": "Fecha Inicio",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fec_ini_var",
+							"value": {
+								"value": "@concat(pipeline().parameters.fec_ini,'T00:00:00UTC')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "Fecha Fin",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "fec_fin_var",
+							"value": {
+								"value": "@concat(pipeline().parameters.fec_fin,'T23:59:59UTC')",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"fec_ini": {
+						"type": "string"
+					},
+					"fec_fin": {
+						"type": "string"
+					}
+				},
+				"variables": {
+					"fec_ini_var": {
+						"type": "String"
+					},
+					"fec_fin_var": {
+						"type": "String"
+					}
+				},
+				"folder": {
+					"name": "99 Procesos puntuales"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-11T08:27:30Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/99 traspaso calculos_catastro_app')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "drop table calculos_app.catastro_app;\nCREATE TABLE \ncalculos_app.catastro_app (\n\tcod_agr_portales nvarchar(44) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,\n\tref_cat_finca nvarchar(14) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,\n\tseccioncensal nvarchar(10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\n\tusos nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\n\tcod_provin nvarchar(3) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\n\tcod_munici_ine nvarchar(5) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\n\tnum_viviendas float NULL,\n\tsuperf_media_viviendas float NULL,\n\tsuperf_min_viviendas float NULL,\n\tsuperf_max_viviendas float NULL,\n\taltura_plantas_viviendas float NULL,\n\ttotal_plantas_viviendas float NULL,\n\tantiguedad_viviendas float NULL,\n\tnum_inmuebles float NULL,\n\tsuperf_media_inmuebles float NULL,\n\tsuperf_min_inmuebles float NULL,\n\tsuperf_max_inmuebles float NULL,\n\taltura_plantas_inmuebles float NULL,\n\ttotal_plantas_inmuebles float NULL,\n\tantiguedad_inmuebles float NULL,\n\tnum_comercios float NULL,\n\tnum_oficinas float NULL,\n\tsuperf_media_oficinas float NULL,\n\tsuperf_min_oficinas float NULL,\n\tsuperf_max_oficinas float NULL,\n\tsuperf_media_comercios float NULL,\n\tsuperf_min_comercios float NULL,\n\tsuperf_max_comercios float NULL,\n\tgeo_gps_y_latitud float NOT NULL,\n\tgeo_gps_x_longitud float NOT NULL,\n\tgeo_coordenadas geography NULL,\n\tCONSTRAINT PK_cod_agr_portales PRIMARY KEY (cod_agr_portales)\n);",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "calculos_app",
+									"tabla": "catastro_app"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "calculos_app",
+									"tabla": "catastro_app",
+									"bbdd": "farma"
+								}
+							}
+						]
+					},
+					{
+						"name": "Copy data1_copy1",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Script1",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "calculos_app",
+									"tabla": "datos_ine_con_viviendas"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "calculos_app",
+									"tabla": "datos_ine_con_viviendas",
+									"bbdd": "farma"
+								}
+							}
+						]
+					},
+					{
+						"name": "Script1",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "Copy data1",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"bbdd": "farma"
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "CREATE NONCLUSTERED INDEX catastro_app_geo_gps_y_latitud_IDX ON calculos_app.catastro_app (  geo_gps_y_latitud ASC  , geo_gps_x_longitud ASC  )  \n\t WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )\n\t ON [PRIMARY ] ;\n CREATE NONCLUSTERED INDEX catastro_app_seccioncensal_IDX ON calculos_app.catastro_app (  seccioncensal ASC  )  \n\t WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )\n\t ON [PRIMARY ] ;\nCREATE INDEX idx_geoespacial ON calculos_app.catastro_app (geo_coordenadas);"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "99 Procesos puntuales"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-03-17T17:38:33Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CREA DATOS_COORDENADAS_SECCION')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DATOS ratio_segunda_vivienda",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "indexa tabla particiones",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "\r\n\r\nSELECT f.anno, c.seccioncensal,\r\n    CASE WHEN SUM(CAST(c.num_viviendas AS DECIMAL)) = 0 THEN 0\r\n         ELSE ROUND((SUM(CAST(c.num_viviendas AS DECIMAL)) - avg(f.familias)) / NULLIF(SUM(CAST(c.num_viviendas AS DECIMAL)), 0), 3)\r\n    END AS Por_Segun_vivienda\r\nFROM geo_area.tb_catastro_portales_nueva c\r\nINNER JOIN (\r\n    SELECT *, ROUND(poblacion / NULLIF(tamaño_medio_hogar, 0), 3) AS familias\r\n    FROM geo_area.datos_integracion_sc\r\n    WHERE tamaño_medio_hogar IS NOT NULL AND tamaño_medio_hogar <> 0\r\n    ) f ON c.seccioncensal = f.seccioncensal and f.anno > cast(replace(c.antiguedad_viviendas,',','.') as int)\r\nGROUP BY f.anno, c.seccioncensal;",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "truncate table geo_area.ratio_segunda_vivienda;",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "geo_area",
+									"tabla": "ratio_segunda_vivienda"
+								}
+							}
+						]
+					},
+					{
+						"name": "DATOS tb_catastro_poblacion",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT cod_agr_portales, ref_cat_finca, c.seccioncensal, d.anno,\r\nCAST(SUBSTRING(c.seccioncensal,1,5) as int) as cod_sc_provin_municipio,\r\n    ROUND(CAST(REPLACE(geo_gps_y_latitud,',','.') as float),5) as latitud,\r\n    ROUND(CAST(REPLACE(geo_gps_x_longitud,',','.') as float),5) as longitud,\r\n    ROUND(CAST(REPLACE(geo_gps_y_latitud,',','.') as float),2) as lat_short,\r\n    ROUND(CAST(REPLACE(geo_gps_x_longitud,',','.') as float),2) as long_short,\r\nnum_viviendas, superf_media_viviendas, superf_min_viviendas, superf_max_viviendas, altura_plantas_viviendas, total_plantas_viviendas, antiguedad_viviendas, num_inmuebles, superf_media_inmuebles, superf_min_inmuebles, superf_max_inmuebles, altura_plantas_inmuebles, total_plantas_inmuebles, antiguedad_inmuebles, cultivos, num_comercios, num_oficinas, superf_media_oficinas, superf_min_oficinas, superf_max_oficinas, superf_media_comercios, superf_min_comercios, superf_max_comercios, geo_gps_y_latitud, geo_gps_x_longitud, geo_gps_y_x, num_gps_y_latitud, num_gps_x_longitud, zonacatastral, cod_zona_concent, f_datos_catastrales, f_proceso_actualizacion\r\n, tamaño_medio_hogar, renta_media_uc, renta_mediana_uc, \r\nrenta_bruta_media_hogar, renta_bruta_media_persona, renta_neta_media_hogar, \r\nrenta_neta_media_persona, fuente_ingreso_otras_pres, fuente_ingreso_otros_ing,\r\nfuente_ingreso_pension, fuente_ingreso_desempleo, fuente_ingreso_salario, \r\npor_poblacion_renta_menor_10000, por_poblacion_renta_menor_5000, por_poblacion_renta_menor_7500,\r\npor_poblacion_renta_mediana_menor_40, por_poblacion_renta_mediana_menor_50, por_poblacion_renta_mediana_menor_60,\r\npor_poblacion_renta_mediana_mayor_140, por_poblacion_renta_mediana_mayor_160, por_poblacion_renta_mediana_mayor_200,\r\nedad_media_poblacion, por_hogares_unipersonales, por_menor_18, poblacion, por_poblacion_espanola, por_mayor_65,\r\n    (1 - s.por_segun_vivienda) * c.num_viviendas * d.tamaño_medio_hogar  AS poblacion_viviendas,\r\n    (1 - s.por_segun_vivienda) * c.num_viviendas  as total_familias_viviendas,\r\n    s.por_segun_vivienda\r\n    from geo_area.tb_catastro_portales_nueva c\r\nleft join geo_area.datos_integracion_sc d on (c.seccioncensal = d.seccioncensal)\r\nleft join geo_area.ratio_segunda_vivienda s on (c.seccioncensal = s.seccioncensal)\r\nand d.anno = s.anno\r\nwhere d.anno >  cast(replace(c.antiguedad_viviendas,',','.') as int)\r\n",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "geo_area",
+									"tabla": "catastro_integrado_ine"
+								}
+							}
+						]
+					},
+					{
+						"name": "indexa tabla particiones",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "DATOS tb_catastro_poblacion",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "DWH_open_data",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "NonQuery",
+									"text": "CREATE INDEX idx_anno ON open_data.geo_area.catastro_integrado_ine (anno);\r\nCREATE INDEX idx_lat_short ON open_data.geo_area.catastro_integrado_ine (lat_short);\r\nCREATE INDEX idx_long_short ON open_data.geo_area.catastro_integrado_ine (long_short);"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "99 Procesos puntuales"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-23T17:21:02Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/bbdd_to_data_lake_parquet')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									},
+									"bbdd": {
+										"value": "@pipeline().parameters.bbdd",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "archivos_parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "salud"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "direcciones/zonas_influencia"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "zonas_influencia"
+					},
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-01-31T13:32:35Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/carga antiguo catastro')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT cod_agr_portales,\r\ncod_agr_tramos,\r\nref_cat_finca,\r\ncod_provin,\r\ncod_munici_dgc,\r\ncod_munici_ine,\r\nseccioncensal, \r\ncod_via_ine,\r\nprovincia, municipio, localidad, tipovia, literalvia, numportal, letraportal, segundo_num_via, segunda_letra, cod_postal,\r\ncast(replace(num_viviendas, ',','.') as int) num_viviendas,\r\ncast(replace(superf_media_viviendas, ',','.') as float) superf_media_viviendas,\r\ncast(replace(altura_viviendas, ',','.') as float) altura_viviendas,\r\ncast(replace(antiguedad_viviendas, ',','.') as float) antiguedad_viviendas,\r\ncast(replace(num_inmuebles, ',','.') as int) num_inmuebles,\r\nTRY_CONVERT(float, replace(superf_media_inmuebles, ',','.') ) superf_media_inmuebles,\r\nTRY_CONVERT(int, replace(altura_inmuebles, ',','.') ) altura_inmuebles,\r\nTRY_CONVERT(int, replace(antiguedad_inmuebles, ',','.') ) antiguedad_inmuebles,\r\nTRY_CONVERT(int, replace(num_comercios, ',','.') ) num_comercios,\r\nTRY_CONVERT(int, replace(num_oficinas, ',','.') ) num_oficinas,\r\n geo_gps_y_latitud, geo_gps_x_longitud, geo_gps_y_x,\r\nnum_gps_y_latitud, num_gps_x_longitud, num_int_latitud, num_int_longitud, zonacatastral,\r\ncast(replace(cod_zona_concent, ',','.') as int) cod_zona_concent,\r\n f_datos_catastrales, f_proceso_actualizacion\r\nFROM open_data.geo_area.tb_catastro_portales a\r\nwhere not exists ( select 1 from geo_area.tb_catastro_portales_nueva n where n.ref_cat_finca = a.ref_cat_finca )\r\norder by a.ref_cat_finca;",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "storage_avron",
+										"type": "LinkedServiceReference"
+									},
+									"path": "catastro"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "cod_agr_portales",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "cod_agr_portales",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "ref_cat_finca",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "ref_cat_finca",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "cod_provin",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "cod_provin",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "cod_munici_dgc",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "cod_munici_dgc",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "cod_munici_ine",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "cod_munici_ine",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "seccioncensal",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "seccioncensal",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "provincia",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "provincia",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "municipio",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "municipio",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "localidad",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "localidad",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "tipovia",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "tipovia",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "literalvia",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "literalvia",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "numportal",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "numportal",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "letraportal",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "letraportal",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "segundo_num_via",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "segundo_num_via",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "segunda_letra",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "segunda_letra",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "cod_postal",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "cod_postal",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "num_viviendas",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "num_viviendas",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "superf_media_viviendas",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "superf_media_viviendas",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "antiguedad_viviendas",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "antiguedad_viviendas",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "num_inmuebles",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "num_inmuebles",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "superf_media_inmuebles",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "superf_media_inmuebles",
+											"type": "Double",
+											"physicalType": "float"
+										}
+									},
+									{
+										"source": {
+											"name": "antiguedad_inmuebles",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "antiguedad_inmuebles",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "num_comercios",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "num_comercios",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "num_oficinas",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "num_oficinas",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "geo_gps_y_latitud",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "geo_gps_y_latitud",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "geo_gps_x_longitud",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "geo_gps_x_longitud",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "geo_gps_y_x",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "geo_gps_y_x",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "num_gps_y_latitud",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "num_gps_y_latitud",
+											"type": "Single",
+											"physicalType": "real"
+										}
+									},
+									{
+										"source": {
+											"name": "num_gps_x_longitud",
+											"type": "Double",
+											"physicalType": "float"
+										},
+										"sink": {
+											"name": "num_gps_x_longitud",
+											"type": "Single",
+											"physicalType": "real"
+										}
+									},
+									{
+										"source": {
+											"name": "zonacatastral",
+											"type": "String",
+											"physicalType": "nvarchar"
+										},
+										"sink": {
+											"name": "zonacatastral",
+											"type": "String",
+											"physicalType": "nvarchar"
+										}
+									},
+									{
+										"source": {
+											"name": "cod_zona_concent",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "cod_zona_concent",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									},
+									{
+										"source": {
+											"name": "f_datos_catastrales",
+											"type": "DateTime",
+											"physicalType": "datetime2"
+										},
+										"sink": {
+											"name": "f_datos_catastrales",
+											"type": "DateTime",
+											"physicalType": "datetime2"
+										}
+									},
+									{
+										"source": {
+											"name": "f_proceso_actualizacion",
+											"type": "DateTime",
+											"physicalType": "datetime2"
+										},
+										"sink": {
+											"name": "f_proceso_actualizacion",
+											"type": "DateTime",
+											"physicalType": "datetime2"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "geo_area",
+									"tabla": "tb_catastro_portales_nueva"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "99 Procesos puntuales"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-04-27T16:03:36Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_csv_carpeta')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DTS",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "archivo_texto_Data_Lake_tab",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									},
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"fichero": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									},
+									"bbdd": {
+										"value": "@pipeline().parameters.bbdd",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "salud"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "direcciones/zonas_influencia"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "zonas_influencia"
+					},
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-01-26T11:11:19Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_parquet_carpeta')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DTS",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.parquet",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "archivos_parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									},
+									"bbdd": {
+										"value": "@pipeline().parameters.bbdd",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "salud"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "direcciones/zonas_influencia"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "zonas_influencia"
+					},
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-02-12T16:05:09Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/data_lake_to_farma')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DTS",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "archivo_texto_Data_Lake_tab",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									},
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"fichero": {
+										"value": "@pipeline().parameters.fichero",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									},
+									"bbdd": "farma"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "pois"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "scraping"
+					},
+					"fichero": {
+						"type": "string",
+						"defaultValue": "datos_backup.csv"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "pois_scraping"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-02-01T18:22:50Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/data_lake_to_farma_comas')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DTS",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "archivo_texto_Data_comas",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									},
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"fichero": {
+										"value": "@pipeline().parameters.fichero",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "pois"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "scraping"
+					},
+					"fichero": {
+						"type": "string",
+						"defaultValue": "datos_backup.csv"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "pois_scraping"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-12-15T16:34:03Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/data_lake_to_farma_parquet')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DTS",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.parquet",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "archivos_parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "salud"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "direcciones/zonas_influencia"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "zonas_influencia"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-01-11T12:38:33Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/data_lake_to_opendata')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DTS",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "archivo_texto_Data_Lake_tab",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									},
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"fichero": {
+										"value": "@pipeline().parameters.fichero",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "pois"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "scraping"
+					},
+					"fichero": {
+						"type": "string",
+						"defaultValue": "datos_backup.csv"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "pois_scraping"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-11-22T17:32:50Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/data_lake_to_opendata_comas')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DTS",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									},
+									"path": ""
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "archivo_texto_Data_comas",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									},
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"fichero": {
+										"value": "@pipeline().parameters.fichero",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "pois"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "scraping"
+					},
+					"fichero": {
+						"type": "string",
+						"defaultValue": "datos_backup.csv"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "pois_scraping"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-12-15T16:34:03Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/opensql_to_datalake')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "copiar_a_data_lake",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "archivo_texto_Data_comas",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									},
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"fichero": {
+										"value": "@pipeline().parameters.fichero",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"esquema": {
+						"type": "string",
+						"defaultValue": "CATASTRO"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "link_portales_fincas_secciones"
+					},
+					"contenedor": {
+						"type": "string"
+					},
+					"directorio": {
+						"type": "string"
+					},
+					"fichero": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "99 Procesos puntuales"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-12-18T17:34:55Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/geo_loc')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Odbc1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"tabladestino": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "OdbcTable",
+				"schema": [],
+				"typeProperties": {
+					"tableName": {
+						"value": "@dataset().tabladestino",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/geol_loc')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "geoloc_desarrollo",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"esquema": {
+						"type": "string"
+					},
+					"tabla": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "PostgreSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().esquema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tabla",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/2 carga catastro')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "copia catastro_agregado_fincas_seccion",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "PostgreSqlSource"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "geol_loc",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "geo_area",
+									"tabla": "tb_catastro_portales"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "STG",
+									"tabla": "tb_catastro_portales"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-22T11:05:47Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/geol_loc')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/5 AEMET OBSERVACION_DIARIA')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "1 AEMET OBSERVACION_DIARIA",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "1 AEMET OBSERVACION_HORARIA",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "2 AEMET OBSERVACION_DIARIA DWH",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "1 AEMET OBSERVACION_DIARIA",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "2 AEMET OBSERVACION_HORARIA",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "5 Procesos Completos"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-03-14T16:52:33Z"
+			},
+			"dependsOn": []
+		}
+	]
+}

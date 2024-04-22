@@ -1,0 +1,1083 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "dfopendatanq"
+		},
+		"Odbc1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Odbc1'"
+		},
+		"Odbc1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'Odbc1'"
+		},
+		"geoloc_desarrollo_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'geoloc_desarrollo'"
+		},
+		"Odbc1_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "nquser"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Avro1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "storage_avron",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"directorio": {
+						"type": "string"
+					},
+					"fichero": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Avro",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fichero",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directorio",
+							"type": "Expression"
+						},
+						"fileSystem": "aemet"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BinaryDataDestinationStore')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Connection to your data destination store.  ",
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					},
+					"Directory": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "@dataset().Directory",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/BinaryDataSourceStore')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Connection to your data source store. ",
+				"linkedServiceName": {
+					"referenceName": "storage_avron",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Container": {
+						"type": "string"
+					},
+					"Directory": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Binary",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@dataset().Directory",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().Container",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DWH_open_data')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DWH_open_data",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"esquema": {
+						"type": "string"
+					},
+					"tabla": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().esquema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tabla",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DelimitedText_comas')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "tb_catastro_portales",
+						"fileSystem": "catastro"
+					},
+					"columnDelimiter": "\t",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "'"
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Excel_en_Data_lake')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string"
+					},
+					"directorio": {
+						"type": "string"
+					},
+					"hoja": {
+						"type": "string"
+					},
+					"archivo": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": {
+						"value": "@dataset().hoja",
+						"type": "Expression"
+					},
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@dataset().archivo",
+							"type": "Expression"
+						},
+						"container": {
+							"value": "@dataset().contenedor",
+							"type": "Expression"
+						}
+					},
+					"firstRowAsHeader": true
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/archivo_texto_Data_Lake')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "storage_avron",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"directorio": {
+						"type": "string"
+					},
+					"contenedor": {
+						"type": "string"
+					},
+					"fichero": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fichero",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directorio",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().contenedor",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ";",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": ";Municipios;Distritos;Secciones;Distribución por fuente de ingresos;Periodo;Total",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/archivo_texto_Data_Lake_tab')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "storage_avron",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"directorio": {
+						"type": "string"
+					},
+					"contenedor": {
+						"type": "string"
+					},
+					"fichero": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fichero",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directorio",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().contenedor",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": "\t",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/archivo_texto_Data_comas')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "storage_avron",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"directorio": {
+						"type": "string"
+					},
+					"contenedor": {
+						"type": "string"
+					},
+					"fichero": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fichero",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directorio",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().contenedor",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": ";Municipios;Distritos;Secciones;Distribución por fuente de ingresos;Periodo;Total",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/archivo_texto_Data_comas_copy1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "storage_avron",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"directorio": {
+						"type": "string"
+					},
+					"contenedor": {
+						"type": "string"
+					},
+					"fichero": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fichero",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directorio",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().contenedor",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": "\t",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": ";Municipios;Distritos;Secciones;Distribución por fuente de ingresos;Periodo;Total",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/archivos_parquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage1",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "salud"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "direcciones/zonas_influencia"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": {
+							"value": "@dataset().directorio",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().contenedor",
+							"type": "Expression"
+						}
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/farma')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "farma",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"bbdd": {
+							"value": "@dataset().bbdd",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"esquema": {
+						"type": "string"
+					},
+					"tabla": {
+						"type": "string"
+					},
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().esquema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tabla",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/performance')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "pefformance",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"esquema": {
+						"type": "string"
+					},
+					"tabla": {
+						"type": "string"
+					},
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().esquema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tabla",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/scr_aemet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "scr_aemet",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"url_datos_aemet": {
+							"value": "@dataset().url_datos_aemet",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"url_datos_aemet": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Odbc1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Odbc",
+				"typeProperties": {
+					"connectionString": {
+						"type": "SecureString",
+						"value": "[parameters('Odbc1_connectionString')]"
+					},
+					"authenticationType": "Basic",
+					"userName": "[parameters('Odbc1_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('Odbc1_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "nvqltintruntimedes",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/geoloc_desarrollo')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "PostgreSql",
+				"typeProperties": {
+					"connectionString": "[parameters('geoloc_desarrollo_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "integrationRuntimelocal",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/1 AEMET ESTACIONES_METEOROLOGICAS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "peticion_url_estaciones",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "GET",
+							"headers": {
+								"api_key": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWNhcmRvLmNhbWFjaG9Abm92YXF1YWxpdHkuZXMiLCJqdGkiOiIxMjljNWQzYS1jZWFlLTQ5ZWYtODQ2OS05ZmJjZjY5YzIyMTUiLCJpc3MiOiJBRU1FVCIsImlhdCI6MTY2OTE4NjA4NywidXNlcklkIjoiMTI5YzVkM2EtY2VhZS00OWVmLTg0NjktOWZiY2Y2OWMyMjE1Iiwicm9sZSI6IiJ9.xtPVH8hEwLGRCmyL8Xccv7s2bNVB-wbVL7XSOP1VipM",
+								"cache-control": "no-cache"
+							},
+							"url": "https://opendata.aemet.es/opendata/api/valores/climatologicos/inventarioestaciones/todasestaciones"
+						}
+					},
+					{
+						"name": "copia_observacion_diaria",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "peticion_url_estaciones",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DATE",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "REC_SRC",
+										"value": "API AEMET"
+									}
+								],
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "AvroSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "AvroWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "scr_aemet",
+								"type": "DatasetReference",
+								"parameters": {
+									"url_datos_aemet": {
+										"value": "@activity('peticion_url_estaciones').output.datos",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Avro1",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": "estaciones",
+									"fichero": {
+										"value": "@concat('estaciones_',utcNow('dd'),'.avro')",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "1 Source to Data_Lake"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-03-13T11:29:38Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/scr_aemet')]",
+				"[concat(variables('factoryId'), '/datasets/Avro1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/1 AEMET OBSERVACION_HISTORICA_OLD')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "peticion_url_obserbaciones",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "GET",
+							"headers": {
+								"api_key": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWNhcmRvLmNhbWFjaG9Abm92YXF1YWxpdHkuZXMiLCJqdGkiOiIxMjljNWQzYS1jZWFlLTQ5ZWYtODQ2OS05ZmJjZjY5YzIyMTUiLCJpc3MiOiJBRU1FVCIsImlhdCI6MTY2OTE4NjA4NywidXNlcklkIjoiMTI5YzVkM2EtY2VhZS00OWVmLTg0NjktOWZiY2Y2OWMyMjE1Iiwicm9sZSI6IiJ9.xtPVH8hEwLGRCmyL8Xccv7s2bNVB-wbVL7XSOP1VipM",
+								"cache-control": "no-cache"
+							},
+							"url": "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2023-03-01T00:00:00UTC/fechafin/2023-03-13T23:59:59UTC/todasestaciones"
+						}
+					},
+					{
+						"name": "copia_observacion_diaria",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "peticion_url_obserbaciones",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DATE",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "REC_SRC",
+										"value": "'https://opendata.aemet.es/opendata/api/observacion/convencional/todas'"
+									}
+								],
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "scr_aemet",
+								"type": "DatasetReference",
+								"parameters": {
+									"url_datos_aemet": {
+										"value": "@activity('peticion_url_obserbaciones').output.datos",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "STG",
+									"tabla": "AEMET_OBSERVACION_ESTACION_DIA"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "1 Source to Data_Lake"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-11T08:12:25Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/scr_aemet')]",
+				"[concat(variables('factoryId'), '/datasets/DWH_open_data')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/1 AEMET OBSERVACION_HORARIA')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "peticion_url_observaciones",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "GET",
+							"headers": {
+								"api_key": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWNhcmRvLmNhbWFjaG9Abm92YXF1YWxpdHkuZXMiLCJqdGkiOiIxMjljNWQzYS1jZWFlLTQ5ZWYtODQ2OS05ZmJjZjY5YzIyMTUiLCJpc3MiOiJBRU1FVCIsImlhdCI6MTY2OTE4NjA4NywidXNlcklkIjoiMTI5YzVkM2EtY2VhZS00OWVmLTg0NjktOWZiY2Y2OWMyMjE1Iiwicm9sZSI6IiJ9.xtPVH8hEwLGRCmyL8Xccv7s2bNVB-wbVL7XSOP1VipM",
+								"cache-control": "no-cache"
+							},
+							"url": "https://opendata.aemet.es/opendata/api/observacion/convencional/todas"
+						}
+					},
+					{
+						"name": "copia_observacion_diaria",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "peticion_url_observaciones",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DATE",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									},
+									{
+										"name": "REC_SRC",
+										"value": "'https://opendata.aemet.es/opendata/api/observacion/convencional/todas'"
+									}
+								],
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "AvroSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "AvroWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "scr_aemet",
+								"type": "DatasetReference",
+								"parameters": {
+									"url_datos_aemet": {
+										"value": "@activity('peticion_url_observaciones').output.datos",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Avro1",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": "observacion_diaria",
+									"fichero": {
+										"value": "@concat('observacion_diaria_',pipeline().TriggerTime)",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "1 Source to Data_Lake"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-03-14T16:52:32Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/scr_aemet')]",
+				"[concat(variables('factoryId'), '/datasets/Avro1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/2 AEMET ESTACIONES_METEOROLOGICAS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "copiar estaciones",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AvroSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": false,
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "IF OBJECT_ID('STG.AEMET_ESTACIONES_METEOROLOGICAS') IS NOT NULL\nTRUNCATE TABLE STG.AEMET_ESTACIONES_METEOROLOGICAS;",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"validateDataConsistency": true,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Avro1",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": "estaciones",
+									"fichero": {
+										"value": "@concat('estaciones_',utcNow('dd'),'.avro')",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "STG",
+									"tabla": "AEMET_ESTACIONES_METEOROLOGICAS"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-03-13T11:29:38Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Avro1')]",
+				"[concat(variables('factoryId'), '/datasets/DWH_open_data')]"
+			]
+		}
+	]
+}

@@ -1,0 +1,63 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "dfopendatanq"
+		},
+		"AFAemet_functionKey": {
+			"value": ""
+		},
+		"APK2DB_connectionString": {
+			"value": ""
+		},
+		"AzureBlobStorage1_connectionString": {
+			"value": ""
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"value": ""
+		},
+		"DWH_open_data_connectionString": {
+			"value": ""
+		},
+		"Odbc1_connectionString": {
+			"value": ""
+		},
+		"Odbc1_password": {
+			"value": ""
+		},
+		"farma_connectionString": {
+			"value": ""
+		},
+		"geoloc_desarrollo_connectionString": {
+			"value": ""
+		},
+		"pefformance_connectionString": {
+			"value": ""
+		},
+		"storage_avron_accountKey": {
+			"value": ""
+		},
+		"AFAemet_properties_typeProperties_functionAppUrl": {
+			"value": "https://afaemet.azurewebsites.net"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"value": "https://opendatanq.dfs.core.windows.net/"
+		},
+		"Odbc1_properties_typeProperties_userName": {
+			"value": "nquser"
+		},
+		"scr_aemet_properties_typeProperties_url": {
+			"value": "@{linkedService().url_datos_aemet}"
+		},
+		"storage_avron_properties_typeProperties_url": {
+			"value": "https://opendatanq.dfs.core.windows.net/"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

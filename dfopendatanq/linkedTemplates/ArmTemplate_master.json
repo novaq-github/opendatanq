@@ -1,0 +1,234 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "dfopendatanq"
+		},
+		"AFAemet_functionKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'functionKey' of 'AFAemet'"
+		},
+		"APK2DB_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'APK2DB'"
+		},
+		"AzureBlobStorage1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+		},
+		"DWH_open_data_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'DWH_open_data'"
+		},
+		"Odbc1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Odbc1'"
+		},
+		"Odbc1_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'Odbc1'"
+		},
+		"farma_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'farma'"
+		},
+		"geoloc_desarrollo_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'geoloc_desarrollo'"
+		},
+		"pefformance_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'pefformance'"
+		},
+		"storage_avron_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'storage_avron'"
+		},
+		"AFAemet_properties_typeProperties_functionAppUrl": {
+			"type": "string",
+			"defaultValue": "https://afaemet.azurewebsites.net"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://opendatanq.dfs.core.windows.net/"
+		},
+		"Odbc1_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "nquser"
+		},
+		"scr_aemet_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{linkedService().url_datos_aemet}"
+		},
+		"storage_avron_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://opendatanq.dfs.core.windows.net/"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "dfopendatanq_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AFAemet_functionKey": {
+						"value": "[parameters('AFAemet_functionKey')]"
+					},
+					"APK2DB_connectionString": {
+						"value": "[parameters('APK2DB_connectionString')]"
+					},
+					"AzureBlobStorage1_connectionString": {
+						"value": "[parameters('AzureBlobStorage1_connectionString')]"
+					},
+					"AzureDataLakeStorage1_accountKey": {
+						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+					},
+					"DWH_open_data_connectionString": {
+						"value": "[parameters('DWH_open_data_connectionString')]"
+					},
+					"farma_connectionString": {
+						"value": "[parameters('farma_connectionString')]"
+					},
+					"pefformance_connectionString": {
+						"value": "[parameters('pefformance_connectionString')]"
+					},
+					"storage_avron_accountKey": {
+						"value": "[parameters('storage_avron_accountKey')]"
+					},
+					"AFAemet_properties_typeProperties_functionAppUrl": {
+						"value": "[parameters('AFAemet_properties_typeProperties_functionAppUrl')]"
+					},
+					"AzureDataLakeStorage1_properties_typeProperties_url": {
+						"value": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]"
+					},
+					"scr_aemet_properties_typeProperties_url": {
+						"value": "[parameters('scr_aemet_properties_typeProperties_url')]"
+					},
+					"storage_avron_properties_typeProperties_url": {
+						"value": "[parameters('storage_avron_properties_typeProperties_url')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "dfopendatanq_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"Odbc1_connectionString": {
+						"value": "[parameters('Odbc1_connectionString')]"
+					},
+					"Odbc1_password": {
+						"value": "[parameters('Odbc1_password')]"
+					},
+					"geoloc_desarrollo_connectionString": {
+						"value": "[parameters('geoloc_desarrollo_connectionString')]"
+					},
+					"Odbc1_properties_typeProperties_userName": {
+						"value": "[parameters('Odbc1_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'dfopendatanq_ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "dfopendatanq_ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'dfopendatanq_ArmTemplate_1')]"
+			]
+		},
+		{
+			"name": "dfopendatanq_ArmTemplate_3",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_3.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'dfopendatanq_ArmTemplate_2')]"
+			]
+		},
+		{
+			"name": "dfopendatanq_ArmTemplate_4",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_4.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'dfopendatanq_ArmTemplate_3')]"
+			]
+		}
+	]
+}
