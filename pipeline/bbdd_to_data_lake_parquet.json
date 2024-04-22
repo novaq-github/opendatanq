@@ -17,15 +17,6 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"additionalColumns": [
-							{
-								"name": "LOAD_DTS",
-								"value": {
-									"value": "@pipeline().TriggerTime",
-									"type": "Expression"
-								}
-							}
-						],
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
