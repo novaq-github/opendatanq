@@ -1,0 +1,132 @@
+{
+	"name": "bbdd_to_data_lake_parquet",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"additionalColumns": [
+							{
+								"name": "LOAD_DTS",
+								"value": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								}
+							}
+						],
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"enableSkipIncompatibleRow": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "AzureBlobStorage1",
+								"type": "LinkedServiceReference"
+							}
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": {
+								"value": "@pipeline().parameters.esquema",
+								"type": "Expression"
+							},
+							"tabla": {
+								"value": "@pipeline().parameters.tabla",
+								"type": "Expression"
+							},
+							"bbdd": {
+								"value": "@pipeline().parameters.bbdd",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "archivos_parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"contenedor": {
+								"value": "@pipeline().parameters.contenedor",
+								"type": "Expression"
+							},
+							"directorio": {
+								"value": "@pipeline().parameters.directorio",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"contenedor": {
+				"type": "string",
+				"defaultValue": "salud"
+			},
+			"directorio": {
+				"type": "string",
+				"defaultValue": "direcciones/zonas_influencia"
+			},
+			"esquema": {
+				"type": "string",
+				"defaultValue": "staging"
+			},
+			"tabla": {
+				"type": "string",
+				"defaultValue": "zonas_influencia"
+			},
+			"bbdd": {
+				"type": "string",
+				"defaultValue": "farma"
+			}
+		},
+		"folder": {
+			"name": "2 DL to STG"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-01-31T13:32:35Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

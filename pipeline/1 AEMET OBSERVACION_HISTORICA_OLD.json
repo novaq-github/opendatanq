@@ -1,0 +1,108 @@
+{
+	"name": "1 AEMET OBSERVACION_HISTORICA_OLD",
+	"properties": {
+		"activities": [
+			{
+				"name": "peticion_url_obserbaciones",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "GET",
+					"headers": {
+						"api_key": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWNhcmRvLmNhbWFjaG9Abm92YXF1YWxpdHkuZXMiLCJqdGkiOiIxMjljNWQzYS1jZWFlLTQ5ZWYtODQ2OS05ZmJjZjY5YzIyMTUiLCJpc3MiOiJBRU1FVCIsImlhdCI6MTY2OTE4NjA4NywidXNlcklkIjoiMTI5YzVkM2EtY2VhZS00OWVmLTg0NjktOWZiY2Y2OWMyMjE1Iiwicm9sZSI6IiJ9.xtPVH8hEwLGRCmyL8Xccv7s2bNVB-wbVL7XSOP1VipM",
+						"cache-control": "no-cache"
+					},
+					"url": "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2023-03-01T00:00:00UTC/fechafin/2023-03-13T23:59:59UTC/todasestaciones"
+				}
+			},
+			{
+				"name": "copia_observacion_diaria",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "peticion_url_obserbaciones",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"additionalColumns": [
+							{
+								"name": "LOAD_DATE",
+								"value": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "REC_SRC",
+								"value": "'https://opendata.aemet.es/opendata/api/observacion/convencional/todas'"
+							}
+						],
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"supportRFC5988": "true"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "scr_aemet",
+						"type": "DatasetReference",
+						"parameters": {
+							"url_datos_aemet": {
+								"value": "@activity('peticion_url_obserbaciones').output.datos",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DWH_open_data",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "STG",
+							"tabla": "AEMET_OBSERVACION_ESTACION_DIA"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "1 Source to Data_Lake"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-05-11T08:12:25Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

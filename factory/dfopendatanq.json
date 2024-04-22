@@ -1,0 +1,14 @@
+{
+	"name": "dfopendatanq",
+	"properties": {
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "false"
+		}
+	},
+	"location": "westeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "2303869e-18cb-40b9-9956-9cfe4482603b",
+		"tenantId": "098d3c43-73c7-4304-bf27-ff91e7f78d36"
+	}
+}

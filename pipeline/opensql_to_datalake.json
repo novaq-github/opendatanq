@@ -1,0 +1,108 @@
+{
+	"name": "opensql_to_datalake",
+	"properties": {
+		"activities": [
+			{
+				"name": "copiar_a_data_lake",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DWH_open_data",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": {
+								"value": "@pipeline().parameters.esquema",
+								"type": "Expression"
+							},
+							"tabla": {
+								"value": "@pipeline().parameters.tabla",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "archivo_texto_Data_comas",
+						"type": "DatasetReference",
+						"parameters": {
+							"directorio": {
+								"value": "@pipeline().parameters.directorio",
+								"type": "Expression"
+							},
+							"contenedor": {
+								"value": "@pipeline().parameters.contenedor",
+								"type": "Expression"
+							},
+							"fichero": {
+								"value": "@pipeline().parameters.fichero",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"esquema": {
+				"type": "string",
+				"defaultValue": "CATASTRO"
+			},
+			"tabla": {
+				"type": "string",
+				"defaultValue": "link_portales_fincas_secciones"
+			},
+			"contenedor": {
+				"type": "string"
+			},
+			"directorio": {
+				"type": "string"
+			},
+			"fichero": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "99 Procesos puntuales"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-12-18T17:34:55Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

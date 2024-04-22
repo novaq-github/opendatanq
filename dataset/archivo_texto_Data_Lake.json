@@ -1,0 +1,50 @@
+{
+	"name": "archivo_texto_Data_Lake",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "storage_avron",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"directorio": {
+				"type": "string"
+			},
+			"contenedor": {
+				"type": "string"
+			},
+			"fichero": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().fichero",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().directorio",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().contenedor",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": ";",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": ";Municipios;Distritos;Secciones;Distribución por fuente de ingresos;Periodo;Total",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

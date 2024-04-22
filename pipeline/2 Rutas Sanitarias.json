@@ -1,0 +1,165 @@
+{
+	"name": "2 Rutas Sanitarias",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy Rutas",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "LOAD_DTS",
+								"value": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": "maestros/rutas",
+							"wildcardFileName": "*",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'rutas' AND type = 'U')\nBEGIN\n    \tdrop TABLE staging.rutas;\n\tEND",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "archivo_texto_Data_Lake_tab",
+						"type": "DatasetReference",
+						"parameters": {
+							"directorio": "1",
+							"contenedor": "salud",
+							"fichero": "1"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "staging",
+							"tabla": "rutas",
+							"bbdd": "farma"
+						}
+					}
+				]
+			},
+			{
+				"name": "RUTAS_FARMACIAS",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy Rutas",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"additionalColumns": [
+							{
+								"name": "LOAD_DTS",
+								"value": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								}
+							}
+						],
+						"sqlReaderQuery": "SELECT R.tipo_via , r.via , r.tramo , r.codigo_postal ,r.tipo_ruta, r.importancia , r.medio  ,r.sentido_transito , SS.[Número Vía] num_via_farma, SS.hash_direccion hash_direccion_farma\nFROM farma.staging.rutas R\nleft  JOIN (select D.[Código Tipo Vía] , D.[Nombre de la vía] , D.[Número Vía] , D.[Código Postal]  , D.hash_direccion\nfrom staging.centros c \nLEFT JOIN staging.direcciones d ON D.hash_direccion = C.hash_direccion \nwhere c.[Tipo centro] = 'E1 - Oficinas de farmacia' ) SS ON SS.[Código Postal]  = R.codigo_postal\nAND SS.[Nombre de la vía] = R.via \nAND SS.[Código Tipo Vía]= R.tipo_via\nwhere  r.via is not null ",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'rutas_farmacias' AND type = 'U')\nBEGIN\n    \tdrop TABLE staging.rutas_farmacias;\n\tEND",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "1",
+							"tabla": "1",
+							"bbdd": "farma"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "staging",
+							"tabla": "rutas_farmacias",
+							"bbdd": "farma"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "2 DL to STG"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-02-12T16:05:09Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

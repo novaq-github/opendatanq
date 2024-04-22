@@ -1,0 +1,170 @@
+{
+	"name": "99 traspaso calculos_catastro_app",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "drop table calculos_app.catastro_app;\nCREATE TABLE \ncalculos_app.catastro_app (\n\tcod_agr_portales nvarchar(44) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,\n\tref_cat_finca nvarchar(14) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,\n\tseccioncensal nvarchar(10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\n\tusos nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\n\tcod_provin nvarchar(3) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\n\tcod_munici_ine nvarchar(5) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\n\tnum_viviendas float NULL,\n\tsuperf_media_viviendas float NULL,\n\tsuperf_min_viviendas float NULL,\n\tsuperf_max_viviendas float NULL,\n\taltura_plantas_viviendas float NULL,\n\ttotal_plantas_viviendas float NULL,\n\tantiguedad_viviendas float NULL,\n\tnum_inmuebles float NULL,\n\tsuperf_media_inmuebles float NULL,\n\tsuperf_min_inmuebles float NULL,\n\tsuperf_max_inmuebles float NULL,\n\taltura_plantas_inmuebles float NULL,\n\ttotal_plantas_inmuebles float NULL,\n\tantiguedad_inmuebles float NULL,\n\tnum_comercios float NULL,\n\tnum_oficinas float NULL,\n\tsuperf_media_oficinas float NULL,\n\tsuperf_min_oficinas float NULL,\n\tsuperf_max_oficinas float NULL,\n\tsuperf_media_comercios float NULL,\n\tsuperf_min_comercios float NULL,\n\tsuperf_max_comercios float NULL,\n\tgeo_gps_y_latitud float NOT NULL,\n\tgeo_gps_x_longitud float NOT NULL,\n\tgeo_coordenadas geography NULL,\n\tCONSTRAINT PK_cod_agr_portales PRIMARY KEY (cod_agr_portales)\n);",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DWH_open_data",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "calculos_app",
+							"tabla": "catastro_app"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "calculos_app",
+							"tabla": "catastro_app",
+							"bbdd": "farma"
+						}
+					}
+				]
+			},
+			{
+				"name": "Copy data1_copy1",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Script1",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DWH_open_data",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "calculos_app",
+							"tabla": "datos_ine_con_viviendas"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "calculos_app",
+							"tabla": "datos_ine_con_viviendas",
+							"bbdd": "farma"
+						}
+					}
+				]
+			},
+			{
+				"name": "Script1",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "Copy data1",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "farma",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"bbdd": "farma"
+					}
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "CREATE NONCLUSTERED INDEX catastro_app_geo_gps_y_latitud_IDX ON calculos_app.catastro_app (  geo_gps_y_latitud ASC  , geo_gps_x_longitud ASC  )  \n\t WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )\n\t ON [PRIMARY ] ;\n CREATE NONCLUSTERED INDEX catastro_app_seccioncensal_IDX ON calculos_app.catastro_app (  seccioncensal ASC  )  \n\t WITH (  PAD_INDEX = OFF ,FILLFACTOR = 100  ,SORT_IN_TEMPDB = OFF , IGNORE_DUP_KEY = OFF , STATISTICS_NORECOMPUTE = OFF , ONLINE = OFF , ALLOW_ROW_LOCKS = ON , ALLOW_PAGE_LOCKS = ON  )\n\t ON [PRIMARY ] ;\nCREATE INDEX idx_geoespacial ON calculos_app.catastro_app (geo_coordenadas);"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"folder": {
+			"name": "99 Procesos puntuales"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-03-17T17:38:33Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

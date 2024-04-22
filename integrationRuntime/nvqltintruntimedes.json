@@ -1,0 +1,7 @@
+{
+	"name": "nvqltintruntimedes",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "Integration runtime acceso red interna nvqlt"
+	}
+}

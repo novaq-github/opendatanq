@@ -1,0 +1,168 @@
+{
+	"name": "CREA DATOS_COORDENADAS_SECCION",
+	"properties": {
+		"activities": [
+			{
+				"name": "DATOS ratio_segunda_vivienda",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "indexa tabla particiones",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "\r\n\r\nSELECT f.anno, c.seccioncensal,\r\n    CASE WHEN SUM(CAST(c.num_viviendas AS DECIMAL)) = 0 THEN 0\r\n         ELSE ROUND((SUM(CAST(c.num_viviendas AS DECIMAL)) - avg(f.familias)) / NULLIF(SUM(CAST(c.num_viviendas AS DECIMAL)), 0), 3)\r\n    END AS Por_Segun_vivienda\r\nFROM geo_area.tb_catastro_portales_nueva c\r\nINNER JOIN (\r\n    SELECT *, ROUND(poblacion / NULLIF(tamaño_medio_hogar, 0), 3) AS familias\r\n    FROM geo_area.datos_integracion_sc\r\n    WHERE tamaño_medio_hogar IS NOT NULL AND tamaño_medio_hogar <> 0\r\n    ) f ON c.seccioncensal = f.seccioncensal and f.anno > cast(replace(c.antiguedad_viviendas,',','.') as int)\r\nGROUP BY f.anno, c.seccioncensal;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "truncate table geo_area.ratio_segunda_vivienda;",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DWH_open_data",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "1",
+							"tabla": "1"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DWH_open_data",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "geo_area",
+							"tabla": "ratio_segunda_vivienda"
+						}
+					}
+				]
+			},
+			{
+				"name": "DATOS tb_catastro_poblacion",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT cod_agr_portales, ref_cat_finca, c.seccioncensal, d.anno,\r\nCAST(SUBSTRING(c.seccioncensal,1,5) as int) as cod_sc_provin_municipio,\r\n    ROUND(CAST(REPLACE(geo_gps_y_latitud,',','.') as float),5) as latitud,\r\n    ROUND(CAST(REPLACE(geo_gps_x_longitud,',','.') as float),5) as longitud,\r\n    ROUND(CAST(REPLACE(geo_gps_y_latitud,',','.') as float),2) as lat_short,\r\n    ROUND(CAST(REPLACE(geo_gps_x_longitud,',','.') as float),2) as long_short,\r\nnum_viviendas, superf_media_viviendas, superf_min_viviendas, superf_max_viviendas, altura_plantas_viviendas, total_plantas_viviendas, antiguedad_viviendas, num_inmuebles, superf_media_inmuebles, superf_min_inmuebles, superf_max_inmuebles, altura_plantas_inmuebles, total_plantas_inmuebles, antiguedad_inmuebles, cultivos, num_comercios, num_oficinas, superf_media_oficinas, superf_min_oficinas, superf_max_oficinas, superf_media_comercios, superf_min_comercios, superf_max_comercios, geo_gps_y_latitud, geo_gps_x_longitud, geo_gps_y_x, num_gps_y_latitud, num_gps_x_longitud, zonacatastral, cod_zona_concent, f_datos_catastrales, f_proceso_actualizacion\r\n, tamaño_medio_hogar, renta_media_uc, renta_mediana_uc, \r\nrenta_bruta_media_hogar, renta_bruta_media_persona, renta_neta_media_hogar, \r\nrenta_neta_media_persona, fuente_ingreso_otras_pres, fuente_ingreso_otros_ing,\r\nfuente_ingreso_pension, fuente_ingreso_desempleo, fuente_ingreso_salario, \r\npor_poblacion_renta_menor_10000, por_poblacion_renta_menor_5000, por_poblacion_renta_menor_7500,\r\npor_poblacion_renta_mediana_menor_40, por_poblacion_renta_mediana_menor_50, por_poblacion_renta_mediana_menor_60,\r\npor_poblacion_renta_mediana_mayor_140, por_poblacion_renta_mediana_mayor_160, por_poblacion_renta_mediana_mayor_200,\r\nedad_media_poblacion, por_hogares_unipersonales, por_menor_18, poblacion, por_poblacion_espanola, por_mayor_65,\r\n    (1 - s.por_segun_vivienda) * c.num_viviendas * d.tamaño_medio_hogar  AS poblacion_viviendas,\r\n    (1 - s.por_segun_vivienda) * c.num_viviendas  as total_familias_viviendas,\r\n    s.por_segun_vivienda\r\n    from geo_area.tb_catastro_portales_nueva c\r\nleft join geo_area.datos_integracion_sc d on (c.seccioncensal = d.seccioncensal)\r\nleft join geo_area.ratio_segunda_vivienda s on (c.seccioncensal = s.seccioncensal)\r\nand d.anno = s.anno\r\nwhere d.anno >  cast(replace(c.antiguedad_viviendas,',','.') as int)\r\n",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DWH_open_data",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "1",
+							"tabla": "1"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DWH_open_data",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "geo_area",
+							"tabla": "catastro_integrado_ine"
+						}
+					}
+				]
+			},
+			{
+				"name": "indexa tabla particiones",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "DATOS tb_catastro_poblacion",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "DWH_open_data",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "NonQuery",
+							"text": "CREATE INDEX idx_anno ON open_data.geo_area.catastro_integrado_ine (anno);\r\nCREATE INDEX idx_lat_short ON open_data.geo_area.catastro_integrado_ine (lat_short);\r\nCREATE INDEX idx_long_short ON open_data.geo_area.catastro_integrado_ine (long_short);"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"folder": {
+			"name": "99 Procesos puntuales"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-05-23T17:21:02Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,144 @@
+{
+	"name": "5 PROYECTO_FARMAS_CADENAS_SEMANALES",
+	"properties": {
+		"activities": [
+			{
+				"name": "2 Carga datos Sanidad",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "2 Carga datos Sanidad",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "2 Carga datos pois",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "2 Carga datos Sanidad",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "2 Carga datos pois",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "2 Rutas Sanitarias",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "2 Carga datos pois",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "2 Rutas Sanitarias",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "2 Zonas_influencia FARMAS",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "2 Carga datos pois",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "2 Zonas_influencia FARMAS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "3 datos farms a DWH",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "2 Carga datos Sanidad",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "3 datos farms a DWH",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "3 calculos entrena farmas",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "2 Zonas_influencia FARMAS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "4 calculos entrena farmas",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "5 Procesos Completos"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-10-31T15:38:24Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

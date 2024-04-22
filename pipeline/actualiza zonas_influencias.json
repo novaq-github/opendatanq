@@ -1,0 +1,136 @@
+{
+	"name": "actualiza zonas_influencias",
+	"properties": {
+		"activities": [
+			{
+				"name": "data_lake_to_farma_parquet",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "data_lake_to_farma_parquet",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"contenedor": "salud",
+						"directorio": "direcciones/zonas_influencia",
+						"esquema": "staging",
+						"tabla": "zonas_influencia_linial"
+					}
+				}
+			},
+			{
+				"name": "carga_ficharo_zonas_rutas",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "data_lake_to_farma_parquet",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "data_lake_to_farma_parquet",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"contenedor": "salud",
+						"directorio": "direcciones/zonas_rutas",
+						"esquema": "staging",
+						"tabla": "zonas_influencia_rutas"
+					}
+				}
+			},
+			{
+				"name": "carga_data_vault",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "carga_ficharo_zonas_rutas",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "farma",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"bbdd": "farma"
+					}
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "\r\ninsert into MAESTROS.LINK_PUNTO_ZONA \r\nselect DISTINCT  key_link_punto_zona, cod_punto, hash_farmacia_cercana, TRY_CONVERT(DATE,LOAD_DTS) LOAD_DTS\r\n--into MAESTROS.LINK_PUNTO_ZONA\r\nfrom staging.zonas_influencia_rutas_hd f\r\nwhere not EXISTS (select 1 from MAESTROS.LINK_PUNTO_ZONA l where  l.key_link_punto_zona= f.key_link_punto_zona)\r\n;\r\n\r\ninsert into MAESTROS.SAT_PUNTO_ZONA\r\nselect DISTINCT  key_link_punto_zona,distancia_ruta, calles_ruta ,hash_diff_link_punto_zona, TRY_CONVERT(DATE,LOAD_DTS) EFFECTIVE_DATETIME,\r\nCAST(NULL AS DATE) EXPIRY_DATETIME,\r\n'zonas_influencia_rutas_hd' ETL_PROCESS_ID,\r\n'S' ACTIVE_RECORD_INDICATOR\r\n--into MAESTROS.SAT_PUNTO_ZONA\r\nfrom staging.zonas_influencia_rutas_hd f\r\nwhere not EXISTS (select 1 from MAESTROS.SAT_PUNTO_ZONA l where  l.key_link_punto_zona= f.key_link_punto_zona AND l.hash_diff_link_punto_zona = f.hash_diff_link_punto_zona)\r\n;\r\n\r\n\r\nWITH CTE AS (\r\n    SELECT\r\n        key_link_punto_zona,\r\n        EFFECTIVE_DATETIME,\r\n        EXPIRY_DATETIME,\r\n        ACTIVE_RECORD_INDICATOR,\r\n        ROW_NUMBER() OVER (PARTITION BY key_link_punto_zona ORDER BY EFFECTIVE_DATETIME DESC, (CASE WHEN EXPIRY_DATETIME IS NULL THEN 1 ELSE 0 END) DESC) AS rn,\r\n        MAX(EFFECTIVE_DATETIME) OVER (PARTITION BY key_link_punto_zona) AS MaxEffectiveDate\r\n    FROM\r\n        MAESTROS.SAT_PUNTO_ZONA\r\n    WHERE\r\n        EXPIRY_DATETIME IS NULL\r\n)\r\nUPDATE CTE\r\nSET\r\n    EXPIRY_DATETIME = (CASE WHEN rn = 1 THEN EXPIRY_DATETIME ELSE MaxEffectiveDate END),\r\n    ACTIVE_RECORD_INDICATOR = (CASE WHEN rn = 1 THEN 'S' ELSE 'N' END)\r\nWHERE\r\n    rn > 1 OR (rn = 1 AND ACTIVE_RECORD_INDICATOR <> 'S');"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "actualiza calculo_zonas_rutas",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "carga_data_vault",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "farma",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"bbdd": "farma"
+					}
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "--crea copia temporal zonas_influencia_ruta \r\nselect cast(lpz.cod_punto  as varchar(100)) cod_punto, cast(lpz.hash_farmacia_cercana as varchar(100)) hash_farmacia_cercana , spz.distancia_ruta ,  \r\nROW_NUMBER() OVER(PARTITION BY cod_punto  ORDER BY spz.distancia_ruta ASC  ) AS posicion\r\ninto calculos.zonas_influencia_ruta_calculo_temp \r\nfrom MAESTROS.LINK_PUNTO_ZONA lpz \r\njoin MAESTROS.SAT_PUNTO_ZONA spz on spz.key_link_punto_zona = lpz.key_link_punto_zona \r\n\r\n-- inserta los registros que aun no tenemos con rutas de las zonas lineales \r\ninsert into calculos.zonas_influencia_ruta_calculo_temp\r\nselect cod_punto , hash_farmacia_cercana1 hash_farmacia_cercana , distancia_farmacia_cercana1 distancia_ruta, 1 posicion  \r\nfrom farma.calculos.zonas_influencia_calculo z\r\nwhere not EXISTS (select 1 from calculos.zonas_influencia_ruta_calculo_temp zr where zr.cod_punto = z.cod_punto)\r\n\r\ninsert into calculos.zonas_influencia_ruta_calculo_temp\r\nselect cod_punto , hash_farmacia_cercana2 hash_farmacia_cercana , distancia_farmacia_cercana2 distancia_ruta, 2 posicion  \r\nfrom farma.calculos.zonas_influencia_calculo z\r\nwhere not EXISTS (select 1 from calculos.zonas_influencia_ruta_calculo_temp zr where zr.cod_punto = z.cod_punto)\r\n\r\nDROP TABLE IF EXISTS calculos.zonas_influencia_ruta_calculo \r\n\r\nEXEC farma.sys.sp_rename N'farma.calculos.zonas_influencia_ruta_calculo_temp', N'zonas_influencia_ruta_calculo', 'OBJECT';\r\n\r\nCREATE INDEX zona_idx_cod_punto ON calculos.zonas_influencia_ruta_calculo(cod_punto);\r\nCREATE INDEX zona_idx_hash_farmacia_cercana1 ON calculos.zonas_influencia_ruta_calculo(hash_farmacia_cercana);\r\n\r\n\r\nSELECT cast(cod_punto as varchar(100)) cod_punto, Lat, lng, \r\n       cast(hash_farmacia_cercana1 as varchar(100)) hash_farmacia_cercana1, distancia_farmacia_cercana1, \r\n       cast(hash_farmacia_cercana2 as varchar(100)) hash_farmacia_cercana2, distancia_farmacia_cercana2, \r\n       cast(hash_farmacia_cercana3 as varchar(100)) hash_farmacia_cercana3, distancia_farmacia_cercana3\r\nINTO calculos.farma_calculos_temp\r\nFROM farma.calculos.zonas_influencia_calculo_hd;\r\n\r\n-- Borrar la tabla antigua\r\nDROP TABLE IF EXISTS calculos.zonas_influencia_calculo_hd_tabla;\r\n\r\n-- Cambiar el nombre de la tabla temporal al definitivo\r\nEXEC farma.sys.sp_rename N'farma.calculos.farma_calculos_temp', N'zonas_influencia_calculo_hd_tabla', 'OBJECT';\r\n\r\n\r\n-- Crear índices en la nueva tabla\r\nCREATE INDEX idx_cod_punto ON calculos.zonas_influencia_calculo_hd_tabla(cod_punto);\r\nCREATE INDEX idx_hash_farmacia_cercana1 ON calculos.zonas_influencia_calculo_hd_tabla(hash_farmacia_cercana1);\r\nCREATE INDEX idx_hash_farmacia_cercana2 ON calculos.zonas_influencia_calculo_hd_tabla(hash_farmacia_cercana2);\r\nCREATE INDEX idx_hash_farmacia_cercana3 ON calculos.zonas_influencia_calculo_hd_tabla(hash_farmacia_cercana3);\r\n\r\n\r\n\r\n\r\n"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"folder": {
+			"name": "4 DWH- DM"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-03-18T10:40:44Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

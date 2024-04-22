@@ -1,0 +1,33 @@
+{
+	"name": "trigger2",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "carga a tabla particionada catastro",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-05-23T17:39:00",
+				"endTime": "2023-05-24T17:39:00",
+				"timeZone": "Romance Standard Time",
+				"schedule": {
+					"minutes": [
+						50
+					],
+					"hours": [
+						23
+					]
+				}
+			}
+		}
+	}
+}

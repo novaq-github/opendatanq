@@ -1,0 +1,73 @@
+{
+	"name": "2 carga catastro_v2",
+	"properties": {
+		"activities": [
+			{
+				"name": "copia catastro_agregado_portales",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"wildcardFileName": "*",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'tb_catastro_portales_espejo' AND type = 'U')\nBEGIN\n    \tdrop TABLE STG.tb_catastro_portales_espejo;\n\tEND",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DelimitedText_comas",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DWH_open_data",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "STG",
+							"tabla": "tb_catastro_portales_espejo"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "2 DL to STG"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-11-14T13:59:07Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

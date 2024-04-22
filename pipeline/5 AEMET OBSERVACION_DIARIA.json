@@ -1,0 +1,52 @@
+{
+	"name": "5 AEMET OBSERVACION_DIARIA",
+	"properties": {
+		"activities": [
+			{
+				"name": "1 AEMET OBSERVACION_DIARIA",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "1 AEMET OBSERVACION_HORARIA",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "2 AEMET OBSERVACION_DIARIA DWH",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "1 AEMET OBSERVACION_DIARIA",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "2 AEMET OBSERVACION_HORARIA",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "5 Procesos Completos"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-03-14T16:52:33Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

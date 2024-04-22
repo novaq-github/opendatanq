@@ -1,0 +1,31 @@
+{
+	"name": "geol_loc",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "geoloc_desarrollo",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"esquema": {
+				"type": "string"
+			},
+			"tabla": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "PostgreSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().esquema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().tabla",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,34 @@
+{
+	"name": "1 AEMET PREDICCION_DIARIA",
+	"properties": {
+		"activities": [
+			{
+				"name": "Descarga predicciones diarias",
+				"type": "AzureFunctionActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"functionName": "prediccionesAemet",
+					"method": "GET"
+				},
+				"linkedServiceName": {
+					"referenceName": "AFAemet",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"folder": {
+			"name": "1 Source to Data_Lake"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-04-10T11:21:36Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

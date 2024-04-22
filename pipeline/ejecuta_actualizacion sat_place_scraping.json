@@ -1,0 +1,65 @@
+{
+	"name": "ejecuta_actualizacion sat_place_scraping",
+	"properties": {
+		"activities": [
+			{
+				"name": "data_lake_to_farma_comas",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "data_lake_to_farma_comas",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"fichero": "backup_scraping650.csv"
+					}
+				}
+			},
+			{
+				"name": "Script1",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "data_lake_to_farma_comas",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "farma",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "INSERT INTO MAESTROS.link_hash_direccion_place\r\nSELECT DISTINCT F.hash_direccion,  F.place_id,  LOAD_DTS START_DTS, NULL END_DTS\r\n--into MAESTROS.link_hash_direccion_place\r\nFROM farma.staging.pois_farmas F\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.link_hash_direccion_place L WHERE L.hash_direccion= F.hash_direccion AND L.place_id= F.place_id);\r\n\r\nWITH CTE AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER(PARTITION BY concat(hash_direccion,place_id) ORDER BY (SELECT NULL)) AS rn\r\n    FROM MAESTROS.link_hash_direccion_place\r\n)\r\nDELETE FROM CTE WHERE rn > 1;\r\n\r\nINSERT INTO MAESTROS.SAT_DATOS_PLACE_NO_VOLATILES\r\nSELECT DISTINCT place_id, name, google_id, full_address, borough, street, postal_code, area_service, country_code,\r\ncountry, city, us_state, state, plus_code, latitude, longitude, time_zone,\r\nCONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CAST(LTRIM(RTRIM(CONCAT(name, google_id, full_address, borough, street, postal_code, area_service, country_code,\r\ncountry, city, us_state, state, plus_code, latitude, longitude, time_zone))) AS NVARCHAR(100))), 2) AS hash_diff_no_volatiles,\r\nCAST(LOAD_DTS AS DATE) AS EFFECTIVE_DATETIME, CAST(NULL AS DATE) AS EXPIRY_DATETIME,\r\n'staging.pois_farmas' AS ETL_PROCESS_ID,\r\n'S' AS ACTIVE_RECORD_INDICATOR\r\n--INTO MAESTROS.SAT_DATOS_PLACE_NO_VOLATILES_2\r\nFROM staging.pois_farmas_hd f\r\nWHERE (name IS NOT NULL OR google_id IS NOT NULL OR full_address IS NOT NULL OR borough IS NOT NULL OR street IS NOT NULL OR \r\npostal_code IS NOT NULL OR area_service IS NOT NULL OR country_code IS NOT NULL OR country IS NOT NULL OR city IS NOT NULL OR \r\nus_state IS NOT NULL OR state IS NOT NULL OR plus_code IS NOT NULL OR latitude IS NOT NULL OR longitude IS NOT NULL OR time_zone IS NOT NULL)\r\nAND place_id IS NOT NULL\r\nAND NOT EXISTS (\r\n    SELECT 1 \r\n    FROM MAESTROS.SAT_DATOS_PLACE_NO_VOLATILES s \r\n    WHERE f.place_id = s.place_id \r\n    AND f.hash_diff_no_volatiles = s.hash_diff_no_volatiles\r\n);\r\n\r\nINSERT INTO MAESTROS.SAT_DATOS_PLACE_VOLATILES\r\nSELECT DISTINCT place_id, site, phone, [type], logo, description, typical_time_spent, located_in, located_google_id, \r\ncategory, subtypes, posts, photos_count, cid, reviews_link, reviews_id, photo, street_view, about, [range], \r\nreservation_links, booking_appointment_link, menu_link, order_links, owner_id,\r\nverified, owner_title, owner_link, location_link,\r\nCONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CAST(LTRIM(RTRIM(CONCAT(site, phone, [type], logo, description, typical_time_spent, located_in, located_google_id, \r\ncategory, subtypes, posts, photos_count, cid, reviews_link, reviews_id, photo, street_view, about, [range], reservation_links, booking_appointment_link, menu_link, order_links, owner_id,\r\nverified, owner_title, owner_link, location_link))) AS NVARCHAR(100))), 2) AS hash_diff_volatiles,\r\nCAST(LOAD_DTS AS DATE) AS EFFECTIVE_DATETIME, CAST(NULL AS DATE) AS EXPIRY_DATETIME,\r\n'staging.pois_farmas' AS ETL_PROCESS_ID,\r\n'S' AS ACTIVE_RECORD_INDICATOR\r\n--into MAESTROS.SAT_DATOS_PLACE_VOLATILES_2\r\nFROM staging.pois_farmas_hd f\r\nWHERE (site IS NOT NULL OR phone IS NOT NULL OR [type] IS NOT NULL OR logo IS NOT NULL OR description IS NOT NULL OR \r\ntypical_time_spent IS NOT NULL OR located_in IS NOT NULL OR located_google_id IS NOT NULL OR category IS NOT NULL OR \r\nsubtypes IS NOT NULL OR posts IS NOT NULL OR photos_count IS NOT NULL OR cid IS NOT NULL OR reviews_link IS NOT NULL OR \r\nreviews_id IS NOT NULL OR photo IS NOT NULL OR street_view IS NOT NULL OR about IS NOT NULL OR [range] IS NOT NULL OR \r\nreservation_links IS NOT NULL OR booking_appointment_link IS NOT NULL OR menu_link IS NOT NULL OR order_links IS NOT NULL OR \r\nowner_id IS NOT NULL OR verified IS NOT NULL OR owner_title IS NOT NULL OR owner_link IS NOT NULL OR location_link IS NOT NULL)\r\nAND place_id IS NOT NULL\r\nAND NOT EXISTS (\r\n    SELECT 1 \r\n    FROM MAESTROS.SAT_DATOS_PLACE_VOLATILES s \r\n    WHERE f.place_id = s.place_id \r\n    AND f.hash_diff_volatiles = s.hash_diff_volatiles\r\n);\r\n\r\n\r\nWITH CTE AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER(PARTITION BY place_id ORDER BY (SELECT NULL)) AS rn\r\n    FROM MAESTROS.SAT_DATOS_PLACE_VOLATILES\r\n)\r\nDELETE FROM CTE WHERE rn > 1;\r\n\r\nINSERT INTO MAESTROS.SAT_DATOS_PLACE_AFLUENCIA\r\nSELECT DISTINCT place_id,  popular_times,typical_time_spent,\r\nCONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CAST( LTRIM(RTRIM(concat(popular_times, typical_time_spent))) AS NVARCHAR(100))), 2) AS hash_diff_popular_time,\r\ncast(LOAD_DTS as date)  EFFECTIVE_DATETIME , CAST(NULL AS DATE) EXPIRY_DATETIME,\r\n'staging.pois_farmas' ETL_PROCESS_ID,\r\n'S' ACTIVE_RECORD_INDICATOR\r\n--INTO MAESTROS.SAT_DATOS_PLACE_AFLUENCIA\r\nFROM staging.pois_farmas_hd f\r\nWHERE popular_times IS NOT NULL and place_id is not null\r\nand NOT EXISTS (SELECT 1 FROM MAESTROS.SAT_DATOS_PLACE_AFLUENCIA s WHERE f.place_id= s.place_id and f.hash_diff_popular_time=s.hash_diff_popular_time );\r\n\r\nINSERT INTO MAESTROS.SAT_DATOS_PLACE_AFLUENCIA\r\nSELECT DISTINCT place_id,  popular_times,typical_time_spent,\r\nCONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CAST( LTRIM(RTRIM(concat(popular_times, typical_time_spent))) AS NVARCHAR(100))), 2) AS hash_diff_popular_time,\r\ncast(LOAD_DTS as date)  EFFECTIVE_DATETIME , CAST(NULL AS DATE) EXPIRY_DATETIME,\r\n'popular_time_scrapi' ETL_PROCESS_ID,\r\n'S' ACTIVE_RECORD_INDICATOR\r\n--INTO MAESTROS.SAT_DATOS_PLACE_AFLUENCIA\r\nFROM staging.popular_time_scraping_hd f\r\nWHERE popular_times IS NOT NULL and place_id is not null\r\nand NOT EXISTS (SELECT 1 FROM MAESTROS.SAT_DATOS_PLACE_AFLUENCIA s WHERE f.place_id= s.place_id and f.hash_diff_popular_time=s.hash_diff_popular_time );\r\n\r\n\r\n\r\n\r\nWITH CTE AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER(PARTITION BY concat(place_id,hash_diff_popular_time) ORDER BY (SELECT NULL)) AS rn\r\n    FROM MAESTROS.SAT_DATOS_PLACE_AFLUENCIA\r\n)\r\nDELETE FROM CTE WHERE rn > 1;\r\n\r\n\r\nINSERT INTO MAESTROS.SAT_DATOS_PLACE_REVIEWS\r\nSELECT DISTINCT place_id, rating, reviews, reviews_tags, reviews_per_score,\r\nCONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CAST(LTRIM(RTRIM(CONCAT(rating, reviews, reviews_tags, reviews_per_score))) AS NVARCHAR(100))), 2) AS hash_diff_review,\r\nCAST(LOAD_DTS AS DATE) AS EFFECTIVE_DATETIME, CAST(NULL AS DATE) AS EXPIRY_DATETIME,\r\n'staging.pois_farmas' AS ETL_PROCESS_ID,\r\n'S' AS ACTIVE_RECORD_INDICATOR\r\n--INTO MAESTROS.SAT_DATOS_PLACE_REVIEWS\r\nFROM staging.pois_farmas_hd f\r\nWHERE rating IS NOT NULL AND place_id IS NOT NULL\r\nAND NOT EXISTS (\r\n    SELECT 1 \r\n    FROM MAESTROS.SAT_DATOS_PLACE_REVIEWS s \r\n    WHERE f.place_id = s.place_id \r\n    AND f.hash_diff_review = s.hash_diff_review\r\n);\r\n\r\nINSERT INTO MAESTROS.SAT_DATOS_PLACE_HOURS\r\nSELECT DISTINCT place_id, working_hours_old_format, working_hours, other_hours, business_status,\r\nCONVERT(NVARCHAR(64), HASHBYTES('SHA2_256', CAST(LTRIM(RTRIM(CONCAT(working_hours_old_format, working_hours, other_hours, business_status))) AS NVARCHAR(100))), 2) AS hash_diff_hours,\r\nCAST(LOAD_DTS AS DATE) AS EFFECTIVE_DATETIME, CAST(NULL AS DATE) AS EXPIRY_DATETIME,\r\n'staging.pois_farmas' AS ETL_PROCESS_ID,\r\n'S' AS ACTIVE_RECORD_INDICATOR\r\n--into MAESTROS.SAT_DATOS_PLACE_HOURS\r\nFROM staging.pois_farmas_hd f--staging.pois_farmas_hd f\r\nWHERE (working_hours_old_format IS NOT NULL OR working_hours IS NOT NULL OR other_hours IS NOT NULL OR business_status IS NOT NULL)\r\nAND place_id IS NOT NULL\r\nAND NOT EXISTS (\r\n    SELECT 1 \r\n    FROM MAESTROS.SAT_DATOS_PLACE_HOURS s \r\n    WHERE f.place_id = s.place_id \r\n    AND f.hash_diff_hours = s.hash_diff_hours\r\n);\r\n\r\n\r\n"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"folder": {
+			"name": "99 Procesos puntuales"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-12-15T16:34:03Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

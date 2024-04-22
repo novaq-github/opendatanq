@@ -1,0 +1,25 @@
+{
+	"name": "todos_los_viernes_tarde",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Week",
+				"interval": 1,
+				"startTime": "2023-10-23T18:14:00",
+				"timeZone": "W. Europe Standard Time",
+				"schedule": {
+					"hours": [
+						20
+					],
+					"weekDays": [
+						"Friday"
+					]
+				}
+			}
+		}
+	}
+}

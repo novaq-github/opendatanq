@@ -1,0 +1,481 @@
+{
+	"name": "carga antiguo catastro",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT cod_agr_portales,\r\ncod_agr_tramos,\r\nref_cat_finca,\r\ncod_provin,\r\ncod_munici_dgc,\r\ncod_munici_ine,\r\nseccioncensal, \r\ncod_via_ine,\r\nprovincia, municipio, localidad, tipovia, literalvia, numportal, letraportal, segundo_num_via, segunda_letra, cod_postal,\r\ncast(replace(num_viviendas, ',','.') as int) num_viviendas,\r\ncast(replace(superf_media_viviendas, ',','.') as float) superf_media_viviendas,\r\ncast(replace(altura_viviendas, ',','.') as float) altura_viviendas,\r\ncast(replace(antiguedad_viviendas, ',','.') as float) antiguedad_viviendas,\r\ncast(replace(num_inmuebles, ',','.') as int) num_inmuebles,\r\nTRY_CONVERT(float, replace(superf_media_inmuebles, ',','.') ) superf_media_inmuebles,\r\nTRY_CONVERT(int, replace(altura_inmuebles, ',','.') ) altura_inmuebles,\r\nTRY_CONVERT(int, replace(antiguedad_inmuebles, ',','.') ) antiguedad_inmuebles,\r\nTRY_CONVERT(int, replace(num_comercios, ',','.') ) num_comercios,\r\nTRY_CONVERT(int, replace(num_oficinas, ',','.') ) num_oficinas,\r\n geo_gps_y_latitud, geo_gps_x_longitud, geo_gps_y_x,\r\nnum_gps_y_latitud, num_gps_x_longitud, num_int_latitud, num_int_longitud, zonacatastral,\r\ncast(replace(cod_zona_concent, ',','.') as int) cod_zona_concent,\r\n f_datos_catastrales, f_proceso_actualizacion\r\nFROM open_data.geo_area.tb_catastro_portales a\r\nwhere not exists ( select 1 from geo_area.tb_catastro_portales_nueva n where n.ref_cat_finca = a.ref_cat_finca )\r\norder by a.ref_cat_finca;",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false
+					},
+					"enableStaging": false,
+					"enableSkipIncompatibleRow": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "storage_avron",
+								"type": "LinkedServiceReference"
+							},
+							"path": "catastro"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "cod_agr_portales",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "cod_agr_portales",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "ref_cat_finca",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "ref_cat_finca",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "cod_provin",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "cod_provin",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "cod_munici_dgc",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "cod_munici_dgc",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "cod_munici_ine",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "cod_munici_ine",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "seccioncensal",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "seccioncensal",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "provincia",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "provincia",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "municipio",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "municipio",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "localidad",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "localidad",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "tipovia",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "tipovia",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "literalvia",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "literalvia",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "numportal",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "numportal",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "letraportal",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "letraportal",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "segundo_num_via",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "segundo_num_via",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "segunda_letra",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "segunda_letra",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "cod_postal",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "cod_postal",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "num_viviendas",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "num_viviendas",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "superf_media_viviendas",
+									"type": "Double",
+									"physicalType": "float"
+								},
+								"sink": {
+									"name": "superf_media_viviendas",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							},
+							{
+								"source": {
+									"name": "antiguedad_viviendas",
+									"type": "Double",
+									"physicalType": "float"
+								},
+								"sink": {
+									"name": "antiguedad_viviendas",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "num_inmuebles",
+									"type": "Double",
+									"physicalType": "float"
+								},
+								"sink": {
+									"name": "num_inmuebles",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "superf_media_inmuebles",
+									"type": "Double",
+									"physicalType": "float"
+								},
+								"sink": {
+									"name": "superf_media_inmuebles",
+									"type": "Double",
+									"physicalType": "float"
+								}
+							},
+							{
+								"source": {
+									"name": "antiguedad_inmuebles",
+									"type": "Double",
+									"physicalType": "float"
+								},
+								"sink": {
+									"name": "antiguedad_inmuebles",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "num_comercios",
+									"type": "Double",
+									"physicalType": "float"
+								},
+								"sink": {
+									"name": "num_comercios",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "num_oficinas",
+									"type": "Double",
+									"physicalType": "float"
+								},
+								"sink": {
+									"name": "num_oficinas",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "geo_gps_y_latitud",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "geo_gps_y_latitud",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "geo_gps_x_longitud",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "geo_gps_x_longitud",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "geo_gps_y_x",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "geo_gps_y_x",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "num_gps_y_latitud",
+									"type": "Double",
+									"physicalType": "float"
+								},
+								"sink": {
+									"name": "num_gps_y_latitud",
+									"type": "Single",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"name": "num_gps_x_longitud",
+									"type": "Double",
+									"physicalType": "float"
+								},
+								"sink": {
+									"name": "num_gps_x_longitud",
+									"type": "Single",
+									"physicalType": "real"
+								}
+							},
+							{
+								"source": {
+									"name": "zonacatastral",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "zonacatastral",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "cod_zona_concent",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "cod_zona_concent",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
+									"name": "f_datos_catastrales",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								},
+								"sink": {
+									"name": "f_datos_catastrales",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							},
+							{
+								"source": {
+									"name": "f_proceso_actualizacion",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								},
+								"sink": {
+									"name": "f_proceso_actualizacion",
+									"type": "DateTime",
+									"physicalType": "datetime2"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DWH_open_data",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "1",
+							"tabla": "1"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DWH_open_data",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "geo_area",
+							"tabla": "tb_catastro_portales_nueva"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "99 Procesos puntuales"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-04-27T16:03:36Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

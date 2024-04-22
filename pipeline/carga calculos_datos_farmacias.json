@@ -1,0 +1,42 @@
+{
+	"name": "carga calculos_datos_farmacias",
+	"properties": {
+		"activities": [
+			{
+				"name": "farmacias",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "farma",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"bbdd": "farma"
+					}
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "\r\nCREATE TABLE farma.calculos.datos_farmacias_2 (\r\n\thash_codigo_centro nvarchar(64) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,\r\n\tnombre_oficial nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tfecha_primera_apertura date NULL,\r\n\tfecha_ultimo_cambio_administrativo date NULL,\r\n\tdireccion_oficial nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tdireccion_normalizada nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tprecision_normalización float NULL,\r\n\tprecision_busqueda_place float NULL,\r\n\tlatitud float NULL,\r\n\tlongitud float NULL,\r\n\thorario nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\testado nvarchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tplace_id nvarchar(150) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tnombre_google nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tafluencia nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tratio_valoracion nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tcomentarios_por_ratio nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tlink_centro nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tinformacion_servicios nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tServicios_centro nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tgeo_coordenadas geography NULL\r\n\t);\r\n\r\n--TRUNCATE TABLE calculos.datos_farmacias_2;\r\n\r\n\r\n\r\nSELECT\r\nCOALESCE (s2.cod_bbdd, concat('sin_bbdd_', p.place_id)) cod_bbdd,\r\nCOALESCE (l.hash_codigo_centro, concat('sin_hash_centro_', p.place_id)) hash_codigo_centro,\r\nCOALESCE (s2.nombre_cod_bbdd , p.name) nombre_oficial,\r\np.place_id ,\r\nCOALESCE (s2.dir_normalizada_cod_farma, p.full_address) direccion_oficial,\r\nTRY_CONVERT(date, fecha_autorizacion_funcionamiento) AS   fecha_primera_apertura,\r\nTRY_CONVERT(date, fecha_ultima_autorizacion) AS  fecha_ultimo_cambio_administrativo,\r\np.full_address  direccion_normalizada,\r\ns2.semejanza_dir_place precision_normalización\r\n,(try_convert(float,s2.semejanza_dir_place) +try_convert(float,s2.semejanza_cp_place))/2  precision_busqueda_place,\r\nTRY_CONVERT(float,p.latitude) latitud,\r\nTRY_CONVERT(float,p.longitude) longitud,\r\np.working_hours horario,\r\np.business_status estado,\r\np.name  nombre_google,\r\np.popular_times afluencia,\r\np.rating ratio_valoracion,\r\np.reviews_per_score comentarios_por_ratio,\r\np.street_view link_centro,\r\np.about informacion_servicios\r\n,ser_cen.Servicios_centro\r\n--count(*) , count(DISTINCT p.place_id) , count( DISTINCT COALESCE(p.place_id, s2.cod_bbdd  , l.hash_codigo_centro  ) )\r\ninto calculos.temp_calculo_farmacias\r\nFROM farma.MAESTROS.pip_sat_place p\r\nleft  JOIN \r\n    (SELECT *, ROW_NUMBER() OVER (PARTITION BY place_id ORDER BY semejanza_dir_place DESC) as rn \r\n     FROM calculos.ranking_direcciones_normalizadas) as l ON l.place_id = p.place_id AND l.rn = 1\r\nleft JOIN \r\n    (SELECT *, ROW_NUMBER() OVER (PARTITION BY place_id ORDER BY semejanza_dir_place DESC) as rn \r\n     FROM farma.MAESTROS.sat_similitud_direcciones_cod_bbdd) as s2 ON s2.place_id = p.place_id AND s2.rn = 1\r\nleft join \r\n     MAESTROS.SAT_CENTRO_FECHAS_ADMIN s4 on s4.hash_codigo_centro= l.hash_codigo_centro and s4.ACTIVE_RECORD_INDICATOR ='S'\r\nleft join MAESTROS.referencia_ubicaciones_multicentros ser_cen on ser_cen.address_label= s2.dir_normalizada_cod_farma\r\nwhere     \"type\" IN('Pharmacy', 'Farmacia')  and TRY_CONVERT(float,p.latitude) is not null and TRY_CONVERT(float,p.longitude) is not null\r\n\r\n\r\n\r\n\r\ninsert into calculos.datos_farmacias_2 (hash_codigo_centro, nombre_oficial, fecha_primera_apertura, fecha_ultimo_cambio_administrativo, direccion_oficial, direccion_normalizada, precision_normalización, precision_busqueda_place, latitud, longitud, horario, estado,place_id, nombre_google, afluencia, ratio_valoracion, comentarios_por_ratio, link_centro, informacion_servicios, Servicios_centro, geo_coordenadas)\r\nSELECT \r\nhash_codigo_centro, nombre_oficial, fecha_primera_apertura, fecha_ultimo_cambio_administrativo, \r\ndireccion_oficial, direccion_normalizada, precision_normalización, precision_busqueda_place,\r\nlatitud, longitud, horario, estado,place_id, nombre_google, afluencia, ratio_valoracion,\r\ncomentarios_por_ratio, link_centro, informacion_servicios, Servicios_centro\r\n,geography::Point(latitud, longitud, 4326) AS geo_coordenadas\r\n--into calculos.datos_farmacias_2\r\nFROM calculos.temp_calculo_farmacias p\r\nJOIN (select DISTINCT golden_record from  MAESTROS.LINK_DUPLICADOS_PLACE_FARMACIAS L \r\njoin MAESTROS.SAT_DUPLICADOS_PLACE_FARMACIAS S ON S.key_link_deduplicados_farmas= L.key_link_deduplicados_farmas\r\nWHERE  proba_duplicado >0.55) DUP ON DUP.golden_record= p.place_id\r\nWHERE \r\n    p.latitud IS NOT NULL AND p.longitud IS NOT NULL\r\n    AND p.latitud BETWEEN -90 AND 90 AND p.longitud BETWEEN -180 AND 180\r\n;\r\nEXEC farma.sys.sp_rename N'farma.calculos.datos_farmacias', N'datos_farmacias_old', 'OBJECT';\r\nEXEC farma.sys.sp_rename N'farma.calculos.datos_farmacias_2', N'datos_farmacias', 'OBJECT';\r\n\r\ndrop table calculos.datos_farmacias_old;\r\ndrop table calculos.temp_calculo_farmacias;\r\n\r\n\r\nWITH CTE AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER(PARTITION BY hash_codigo_centro  ORDER BY (SELECT NULL)) AS rn\r\n    FROM calculos.datos_farmacias\r\n)\r\nDELETE FROM CTE WHERE rn > 1;\r\n\r\n\r\nALTER TABLE calculos.datos_farmacias ADD CONSTRAINT PK_hash_codigo_centro PRIMARY KEY CLUSTERED (hash_codigo_centro);\r\nCREATE SPATIAL INDEX idx_geoespacial_datos_farmacia ON calculos.datos_farmacias(geo_coordenadas);\r\n\r\n"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			}
+		],
+		"folder": {
+			"name": "4 DWH- DM"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-04-01T16:53:24Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

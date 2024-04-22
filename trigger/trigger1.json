@@ -1,0 +1,45 @@
+{
+	"name": "trigger1",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "copia_catastro",
+					"type": "PipelineReference"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "2 Rutas Sanitarias",
+					"type": "PipelineReference"
+				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "5 recrea ine",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-10-19T08:11:00",
+				"endTime": "2023-10-26T17:11:00",
+				"timeZone": "Romance Standard Time",
+				"schedule": {
+					"minutes": [
+						55
+					],
+					"hours": [
+						23
+					]
+				}
+			}
+		}
+	}
+}

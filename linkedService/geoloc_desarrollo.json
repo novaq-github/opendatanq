@@ -1,0 +1,16 @@
+{
+	"name": "geoloc_desarrollo",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "PostgreSql",
+		"typeProperties": {
+			"connectionString": "host=10.10.70.50;port=5432;database=geo_loc;uid=nquser;encryptionmethod=0",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJkY2Y0OTg1Ni0yZmEwLTQ1NmEtOGQwNi01NDQ2MDhjMjU0OTAiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "integrationRuntimelocal",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

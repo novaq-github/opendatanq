@@ -1,0 +1,31 @@
+{
+	"name": "APK2DB",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "APK2DB",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"ESQUEMA": {
+				"type": "string"
+			},
+			"TABLA": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().ESQUEMA",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TABLA",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

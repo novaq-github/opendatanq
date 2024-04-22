@@ -1,0 +1,326 @@
+{
+	"name": "2 Carga datos Sanidad",
+	"properties": {
+		"activities": [
+			{
+				"name": "carga Direcciones",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "LOAD_DTS",
+								"value": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'direcciones' AND type = 'U')\n\tBEGIN\n    \tdrop TABLE staging.direcciones;\n\tEND",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "archivo_texto_Data_comas_copy1",
+						"type": "DatasetReference",
+						"parameters": {
+							"directorio": "maestros",
+							"contenedor": "salud",
+							"fichero": "direcciones_completo.csv"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "staging",
+							"tabla": "direcciones"
+						}
+					}
+				]
+			},
+			{
+				"name": "medicos",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "carga Direcciones",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "LOAD_DTS",
+								"value": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'medicos' AND type = 'U')\nBEGIN\n    drop TABLE staging.medicos;\nEND\n",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "archivo_texto_Data_comas_copy1",
+						"type": "DatasetReference",
+						"parameters": {
+							"directorio": "maestros",
+							"contenedor": "salud",
+							"fichero": "maestro_medicos.csv"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "staging",
+							"tabla": "medicos"
+						}
+					}
+				]
+			},
+			{
+				"name": "centros",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "medicos",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "LOAD_DTS",
+								"value": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'centros' AND type = 'U')\nBEGIN\n    drop TABLE staging.centros;\nEND\n",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "archivo_texto_Data_comas_copy1",
+						"type": "DatasetReference",
+						"parameters": {
+							"directorio": "maestros",
+							"contenedor": "salud",
+							"fichero": "maestro_centros.csv"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "staging",
+							"tabla": "centros"
+						}
+					}
+				]
+			},
+			{
+				"name": "hospitales",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "centros",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "LOAD_DTS",
+								"value": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'hospitales' AND type = 'U')\nBEGIN\n    drop TABLE staging.hospitales;\nEND\n",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "archivo_texto_Data_comas_copy1",
+						"type": "DatasetReference",
+						"parameters": {
+							"directorio": "maestros",
+							"contenedor": "salud",
+							"fichero": "maestro_hospitales.csv"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "staging",
+							"tabla": "hospitales"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "2 DL to STG"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-10-13T17:47:38Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

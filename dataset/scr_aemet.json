@@ -1,0 +1,24 @@
+{
+	"name": "scr_aemet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "scr_aemet",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"url_datos_aemet": {
+					"value": "@dataset().url_datos_aemet",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"url_datos_aemet": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

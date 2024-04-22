@@ -1,0 +1,88 @@
+{
+	"name": "2 Zonas_influencia FARMAS_copy1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy poligonos",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "LOAD_DTS",
+								"value": {
+									"value": "@pipeline().TriggerTime",
+									"type": "Expression"
+								}
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobFSReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": "maestros/zonas_influencias/poligonos",
+							"wildcardFileName": "*",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'farmacias_poligono' AND type = 'U')\nBEGIN\n    \tdrop TABLE staging.farmacias_poligono;\n\tEND",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "archivo_texto_Data_Lake_tab",
+						"type": "DatasetReference",
+						"parameters": {
+							"directorio": "1",
+							"contenedor": "salud",
+							"fichero": "1"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": "staging",
+							"tabla": "farmacias_poligono"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "2 DL to STG"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-11-14T13:59:07Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

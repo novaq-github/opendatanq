@@ -1,0 +1,52 @@
+{
+	"name": "5 AEMET PREDICCION_DIARIA",
+	"properties": {
+		"activities": [
+			{
+				"name": "1 AEMET PREDICCION_DIARIA",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "1 AEMET PREDICCION_DIARIA",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "2 AEMET PREDICCION_DIARIA",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "1 AEMET PREDICCION_DIARIA",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "2 AEMET PREDICCION_DIARIA",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "5 Procesos Completos"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-03-14T16:52:32Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,190 @@
+{
+	"name": "5 recrea ine",
+	"properties": {
+		"activities": [
+			{
+				"name": "3 DATOS INE_DEMOGRAFICOS",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "2 INE DATOS_ESTADISTICA_ESPERIMENTAL",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "3 DATOS INE_DEMOGRAFICOS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "3 DATOS INE_FUENTES_RENTA",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "3 DATOS INE_DEMOGRAFICOS",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "3 DATOS INE_FUENTES_RENTA",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "3 DATOS INE_PADRON_EDAD_SEXO",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "3 DATOS INE_FUENTES_RENTA",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "3 DATOS INE_PADRON_EDAD_SEXO",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "3 DATOS INE_RENTAS_MEDIAS",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "3 DATOS INE_UMBRALES_MAX_MIN",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "3 DATOS INE_RENTAS_MEDIAS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "3 DATOS INE_UMBRALES_MAX_MIN",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "3 DATOS INE_UMBRALES_RENTA",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "3 DATOS INE_UMBRALES_MAX_MIN",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "3 DATOS INE_UMBRALES_RENTA",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "3 DATOS INE_PADRON_EDAD_SEXO",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "3 DATOS INE_UMBRALES_RENTA",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "4 carga datos seccion historicos",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "3 DATOS INE_RENTAS_MEDIAS",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "4 carga datos seccion historicos",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "2 INE DATOS_ESTADISTICA_ESPERIMENTAL",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "2 INE DATOS_ESTADISTICA_ESPERIMENTAL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "5 Procesos Completos"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-11-01T18:12:16Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

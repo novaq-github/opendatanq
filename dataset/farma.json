@@ -1,0 +1,41 @@
+{
+	"name": "farma",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "farma",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"bbdd": {
+					"value": "@dataset().bbdd",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"esquema": {
+				"type": "string"
+			},
+			"tabla": {
+				"type": "string"
+			},
+			"bbdd": {
+				"type": "string",
+				"defaultValue": "farma"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().esquema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().tabla",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
