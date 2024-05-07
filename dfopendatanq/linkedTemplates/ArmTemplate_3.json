@@ -13,6 +13,339 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/4 calculos entrena farmas')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "datos ine",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy ine  a farmas_copy1",
+								"dependencyConditions": [
+									"Completed"
+								]
+							},
+							{
+								"activity": "Copy catastro a farmas",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "SELECT * FROM staging.datos_ine_historicos dih \r\nWHERE anno = (SELECT MAX(anno) FROM staging.datos_ine_historicos WHERE  [Tamaño medio del hogar] IS NOT NULL);\r\n",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'DATOS_INE_ULTIMOS' AND type = 'U')\nBEGIN\n    \tdrop TABLE calculos.DATOS_INE_ULTIMOS;\n\tEND",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "calculos",
+									"tabla": "DATOS_INE_ULTIMOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "datos_catastro_ubicacion",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "viviendas_seccion",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "  SELECT\r\n     u.HASH,\r\n    1 AS grado_proximidad, \r\n    CAST(REPLACE(distancia_farmacia_cercana2, ',', '.') AS float) - CAST(REPLACE(distancia_farmacia_cercana1, ',', '.') AS float) AS dif_distancia,\r\n    MAX(CAST(REPLACE(distancia_farmacia_cercana2, ',', '.') AS float) - CAST(REPLACE(distancia_farmacia_cercana1, ',', '.') AS float)) OVER (PARTITION BY u.HASH) AS max_dif_distancia,\r\n    MIN(CAST(REPLACE(distancia_farmacia_cercana2, ',', '.') AS float) - CAST(REPLACE(distancia_farmacia_cercana1, ',', '.') AS float)) OVER (PARTITION BY u.HASH) AS min_dif_distancia,\r\n    c.*\r\n    FROM farma.staging.ZI_catastro zc\r\n    JOIN staging.ubicaciones u ON u.hash_direccion = zc.hash_farmacia_cercana1 \r\n    JOIN\r\n    (SELECT cod_agr_portales ,ref_cat_finca, seccioncensal,  superf_media_viviendas,\r\n        altura_plantas_viviendas, total_plantas_viviendas, antiguedad_viviendas,  superf_media_inmuebles,\r\n        altura_plantas_inmuebles, total_plantas_inmuebles, antiguedad_inmuebles,\r\n        usos, cultivos, superf_media_oficinas,\r\n        superf_media_comercios, num_viviendas\r\n        FROM staging.catastro) c ON c.ref_cat_finca = zc.ref_cat_finca     \r\nUNION ALL\r\n    SELECT\r\n    u.HASH,\r\n    -1 AS grado_proximidad, \r\n    CAST(REPLACE(distancia_farmacia_cercana2, ',', '.') AS float) - CAST(REPLACE(distancia_farmacia_cercana1, ',', '.') AS float) AS dif_distancia,\r\n    MAX(CAST(REPLACE(distancia_farmacia_cercana2, ',', '.') AS float) - CAST(REPLACE(distancia_farmacia_cercana1, ',', '.') AS float)) OVER (PARTITION BY u.HASH) AS max_dif_distancia,\r\n    MIN(CAST(REPLACE(distancia_farmacia_cercana2, ',', '.') AS float) - CAST(REPLACE(distancia_farmacia_cercana1, ',', '.') AS float)) OVER (PARTITION BY u.HASH) AS min_dif_distancia,\r\n    c.*\r\n    FROM farma.staging.ZI_catastro zc\r\n    JOIN staging.ubicaciones u ON u.hash_direccion = zc.hash_farmacia_cercana2\r\n    JOIN\r\n    (SELECT cod_agr_portales ,ref_cat_finca, seccioncensal,  superf_media_viviendas,\r\n        altura_plantas_viviendas, total_plantas_viviendas, antiguedad_viviendas,  superf_media_inmuebles,\r\n        altura_plantas_inmuebles, total_plantas_inmuebles, antiguedad_inmuebles,\r\n        usos, cultivos, superf_media_oficinas,\r\n        superf_media_comercios, num_viviendas\r\n        FROM staging.catastro) c ON c.ref_cat_finca = zc.ref_cat_finca;\r\n",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'datos_catastro_ubicacion' AND type = 'U')\nBEGIN\n    \tdrop TABLE calculos.datos_catastro_ubicacion;\n\tEND",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "calculos",
+									"tabla": "datos_catastro_ubicacion"
+								}
+							}
+						]
+					},
+					{
+						"name": "viviendas_seccion",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "datos ine",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": "WITH VIVIENDAS_SECCION AS (\n    SELECT \n        seccioncensal, \n        SUM(num_viviendas) AS num_viviendas\n    FROM \n        farma.staging.catastro\n    GROUP BY \n        seccioncensal\n)\nSELECT \n    DIU.seccioncensal,\n    CASE WHEN NULLIF(vs.num_viviendas, 0) IS NOT NULL THEN diu.Población / vs.num_viviendas ELSE NULL END AS poblacion_vivienda,\n    diu.[Renta bruta media por persona] AS renta_bruta_media_persona,\n    diu.[Fuente de ingreso: salario] AS ingreso_salario,\n    diu.[Fuente de ingreso: pensiones] AS ingreso_pensiones,\n    diu.[Fuente de ingreso: prestaciones por desempleo] AS ingreso_prestaciones_desempleo,\n    diu.[Fuente de ingreso: otras prestaciones] AS ingreso_otras_prestaciones,\n    diu.[Fuente de ingreso: otros ingresos] AS ingreso_otros,\n    (diu.[Población con ingresos por unidad de consumo por debajo de 10.000 Euros]/100) AS porcentaje_ingresos_debajo_10000,\n    (diu.[Población con ingresos por unidad de consumo por debajo de 5.000 Euros]/100) AS porcentaje_ingresos_debajo_5000,\n    (diu.[Población con ingresos por unidad de consumo por debajo de 7.500 Euros]/100) AS porcentaje_ingresos_debajo_7500,\n    (diu.[Población con ingresos por unidad de consumo por debajo 40% de la mediana]/100) AS porcentaje_ingresos_debajo_40,\n    (diu.[Población con ingresos por unidad de consumo por debajo 50% de la mediana]/100) AS porcentaje_ingresos_debajo_50,\n    (diu.[Población con ingresos por unidad de consumo por debajo 60% de la mediana]/100) AS porcentaje_ingresos_debajo_60,\n    (diu.[Población con ingresos por unidad de consumo por encima 140% de la mediana]/100) AS porcentaje_ingresos_encima_140,\n    (diu.[Población con ingresos por unidad de consumo por encima 160% de la mediana]/100) AS porcentaje_ingresos_encima_160,\n    (diu.[Población con ingresos por unidad de consumo por encima 200% de la mediana]/100) AS porcentaje_ingresos_encima_200,\n    (diu.[Porcentaje de hogares unipersonales]/100) AS porcentaje_hogares_unipersonales,\n    (diu.[Porcentaje de población menor de 18 años]/100) AS porcentaje_poblacion_menor_18,\n    (diu.[Porcentaje de población de 65 y más años]/100) AS porcentaje_poblacion_65_mas,\n    (diu.[Porcentaje de población española]/100) AS porcentaje_poblacion_española,\n    CASE WHEN NULLIF(diu.Población, 0) IS NOT NULL THEN (diu.[Ambos Sexos_0-4]/diu.Población) ELSE NULL END AS porcentaje_menores_5,\n    CASE WHEN NULLIF(diu.Población, 0) IS NOT NULL THEN \n        (([Ambos Sexos_75-79] + [Ambos Sexos_80-84] + [Ambos Sexos_85-89] + [Ambos Sexos_90-94] +[Ambos Sexos_95-99]) / diu.Población) \n    ELSE NULL END AS porcentaje_mayores_75,\n    CASE WHEN NULLIF(diu.Población, 0) IS NOT NULL THEN (diu.[Ambos Sexos_Total África]/diu.Población) ELSE NULL END AS porcentaje_Africa   \nFROM  \n    calculos.DATOS_INE_ULTIMOS AS diu \nLEFT JOIN \n    VIVIENDAS_SECCION AS vs ON vs.seccioncensal = diu.seccioncensal;\n",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'VIVIENDAS_SECCION' AND type = 'U')\nBEGIN\n    \tdrop TABLE calculos.VIVIENDAS_SECCION;\n\tEND",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "calculos",
+									"tabla": "DATOS_INE_RELATIVOS_VIVIENDAS"
+								}
+							}
+						]
+					},
+					{
+						"name": "Copy catastro a farmas",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "truncate table staging.catastro",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "geo_area",
+									"tabla": "tb_catastro_portales_nueva"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "staging",
+									"tabla": "catastro"
+								}
+							}
+						]
+					},
+					{
+						"name": "Copy ine  a farmas_copy1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "truncate table staging.datos_ine_historicos",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "geo_area",
+									"tabla": "datos_secciones_historico"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "staging",
+									"tabla": "datos_ine_historicos"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "4 DWH- DM"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-11-02T13:41:13Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/4 carga datos seccion historicos')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -2620,13 +2953,13 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/2 carga catastro')]",
+			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_csv_carpeta_comas')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "copia catastro_agregado_fincas_seccion",
+						"name": "Copy data",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
@@ -2639,16 +2972,52 @@
 						"userProperties": [],
 						"typeProperties": {
 							"source": {
-								"type": "PostgreSqlSource"
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DTS",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
 							},
 							"sink": {
 								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
+									"type": "Expression"
+								},
 								"writeBehavior": "insert",
 								"sqlWriterUseTableLock": false,
 								"tableOption": "autoCreate",
 								"disableMetricsCollection": false
 							},
 							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
 							"translator": {
 								"type": "TabularTranslator",
 								"typeConversion": true,
@@ -2660,21 +3029,38 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "geol_loc",
+								"referenceName": "archivo_texto_Data_Lake_coma",
 								"type": "DatasetReference",
 								"parameters": {
-									"esquema": "geo_area",
-									"tabla": "tb_catastro_portales"
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									},
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"fichero": "1"
 								}
 							}
 						],
 						"outputs": [
 							{
-								"referenceName": "DWH_open_data",
+								"referenceName": "farma",
 								"type": "DatasetReference",
 								"parameters": {
-									"esquema": "STG",
-									"tabla": "tb_catastro_portales"
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									},
+									"bbdd": {
+										"value": "@pipeline().parameters.bbdd",
+										"type": "Expression"
+									}
 								}
 							}
 						]
@@ -2683,72 +3069,33 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "salud"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "direcciones/zonas_influencia"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "zonas_influencia"
+					},
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
 				"folder": {
 					"name": "2 DL to STG"
 				},
 				"annotations": [],
-				"lastPublishTime": "2023-05-22T11:05:47Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/geol_loc')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/5 AEMET OBSERVACION_DIARIA')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "1 AEMET OBSERVACION_DIARIA",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "1 AEMET OBSERVACION_HORARIA",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "2 AEMET OBSERVACION_DIARIA DWH",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "1 AEMET OBSERVACION_DIARIA",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"policy": {
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "2 AEMET OBSERVACION_HORARIA",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "5 Procesos Completos"
-				},
-				"annotations": [],
-				"lastPublishTime": "2023-03-14T16:52:33Z"
+				"lastPublishTime": "2024-01-26T11:11:19Z"
 			},
 			"dependsOn": []
 		}

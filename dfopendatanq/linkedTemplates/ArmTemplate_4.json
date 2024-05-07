@@ -13,6 +13,137 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/2 carga catastro')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "copia catastro_agregado_fincas_seccion",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "PostgreSqlSource"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "geol_loc",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "geo_area",
+									"tabla": "tb_catastro_portales"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "STG",
+									"tabla": "tb_catastro_portales"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-05-22T11:05:47Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/5 AEMET OBSERVACION_DIARIA')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "1 AEMET OBSERVACION_DIARIA",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "1 AEMET OBSERVACION_HORARIA",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "2 AEMET OBSERVACION_DIARIA DWH",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "1 AEMET OBSERVACION_DIARIA",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "2 AEMET OBSERVACION_HORARIA",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "5 Procesos Completos"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-03-14T16:52:33Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/5 AEMET PREDICCION_DIARIA')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -821,7 +952,9 @@
 					}
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/5 AEMET OBSERVACION_DIARIA')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/PREDICCION_AEMET')]",
