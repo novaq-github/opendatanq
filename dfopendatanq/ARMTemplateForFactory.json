@@ -13335,7 +13335,8 @@
 						"type": "AzureFileStorageLocation",
 						"fileName": "MAESTRO_FARMACIAS.xlsx",
 						"folderPath": "BBC001/MAESTRO_FARMACIAS"
-					}
+					},
+					"firstRowAsHeader": true
 				},
 				"schema": []
 			},
@@ -13402,7 +13403,7 @@
 								"type": "DatasetReference",
 								"parameters": {
 									"contenedor": "salud",
-									"directorio": "maestrosmaestros_farmacias"
+									"directorio": "maestros/maestros_farmacias"
 								}
 							}
 						]
