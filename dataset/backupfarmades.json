@@ -1,0 +1,19 @@
+{
+	"name": "backupfarmades",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "backupfarmades",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"location": {
+				"type": "AzureFileStorageLocation",
+				"fileName": "MAESTRO_FARMACIAS.xlsx",
+				"folderPath": "BBC001/MAESTRO_FARMACIAS"
+			}
+		},
+		"schema": []
+	}
+}

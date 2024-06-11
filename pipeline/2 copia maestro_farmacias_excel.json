@@ -1,0 +1,68 @@
+{
+	"name": "2 copia maestro_farmacias_excel",
+	"properties": {
+		"activities": [
+			{
+				"name": "copia maestro_farmacias_excel",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ExcelSource",
+						"storeSettings": {
+							"type": "AzureFileStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "backupfarmades",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "archivos_parquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"contenedor": "salud",
+							"directorio": "maestrosmaestros_farmacias"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "2 DL to STG"
+		},
+		"annotations": []
+	}
+}
