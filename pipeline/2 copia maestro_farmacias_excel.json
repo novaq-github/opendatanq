@@ -54,7 +54,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"contenedor": "salud",
-							"directorio": "maestrosmaestros_farmacias"
+							"directorio": "maestros/maestros_farmacias"
 						}
 					}
 				]
