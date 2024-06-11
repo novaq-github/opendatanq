@@ -9,6 +9,12 @@
 					"referenceName": "5 AEMET OBSERVACION_DIARIA",
 					"type": "PipelineReference"
 				}
+			},
+			{
+				"pipelineReference": {
+					"referenceName": "2 copia maestro_farmacias_excel",
+					"type": "PipelineReference"
+				}
 			}
 		],
 		"type": "ScheduleTrigger",
