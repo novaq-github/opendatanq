@@ -51,6 +51,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'storage_avron'"
 		},
+		"nvqltalmactempfarmades_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'nvqltalmactempfarmades'"
+		},
+		"backupfarmades_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'backupfarmades'"
+		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {
 			"type": "string",
 			"defaultValue": "https://afaemet.azurewebsites.net"
@@ -221,7 +229,7 @@
 								"api_key": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWNhcmRvLmNhbWFjaG9Abm92YXF1YWxpdHkuZXMiLCJqdGkiOiIxMjljNWQzYS1jZWFlLTQ5ZWYtODQ2OS05ZmJjZjY5YzIyMTUiLCJpc3MiOiJBRU1FVCIsImlhdCI6MTY2OTE4NjA4NywidXNlcklkIjoiMTI5YzVkM2EtY2VhZS00OWVmLTg0NjktOWZiY2Y2OWMyMjE1Iiwicm9sZSI6IiJ9.xtPVH8hEwLGRCmyL8Xccv7s2bNVB-wbVL7XSOP1VipM",
 								"cache-control": "no-cache"
 							},
-							"url": "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2023-03-01T00:00:00UTC/fechafin/2023-03-13T23:59:59UTC/todasestaciones"
+							"url": "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2023-03-01T00:00:00UTC/fechafin/2023-05-13T23:59:59UTC/todasestaciones"
 						}
 					},
 					{
@@ -10825,6 +10833,157 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_csv_carpeta_comas')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DTS",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "archivo_texto_Data_Lake_coma",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									},
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"fichero": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									},
+									"bbdd": {
+										"value": "@pipeline().parameters.bbdd",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "salud"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "direcciones/zonas_influencia"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "zonas_influencia"
+					},
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-01-26T11:11:19Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/archivo_texto_Data_Lake_coma')]",
+				"[concat(variables('factoryId'), '/datasets/farma')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_parquet_carpeta')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -12205,6 +12364,55 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/archivo_texto_Data_Lake_coma')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "storage_avron",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"directorio": {
+						"type": "string"
+					},
+					"contenedor": {
+						"type": "string"
+					},
+					"fichero": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fichero",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directorio",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().contenedor",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/storage_avron')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/archivo_texto_Data_Lake_tab')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -13084,13 +13292,65 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_csv_carpeta_comas')]",
+			"name": "[concat(parameters('factoryName'), '/nvqltalmactempfarmades')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('nvqltalmactempfarmades_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/backupfarmades')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureFileStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('backupfarmades_connectionString')]",
+					"fileShare": "backupfarmades"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/backupfarmades')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "backupfarmades",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": "Hoja1",
+					"location": {
+						"type": "AzureFileStorageLocation",
+						"fileName": "MAESTRO_FARMACIAS.xlsx",
+						"folderPath": "BBC001/MAESTRO_FARMACIAS"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/backupfarmades')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/2 copia maestro_farmacias_excel')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "Copy data",
+						"name": "copia maestro_farmacias_excel",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
@@ -13103,52 +13363,23 @@
 						"userProperties": [],
 						"typeProperties": {
 							"source": {
-								"type": "DelimitedTextSource",
-								"additionalColumns": [
-									{
-										"name": "LOAD_DTS",
-										"value": {
-											"value": "@pipeline().TriggerTime",
-											"type": "Expression"
-										}
-									}
-								],
+								"type": "ExcelSource",
 								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
+									"type": "AzureFileStorageReadSettings",
 									"recursive": true,
-									"wildcardFileName": "*.csv",
 									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
 								}
 							},
 							"sink": {
-								"type": "AzureSqlSink",
-								"preCopyScript": {
-									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
-									"type": "Expression"
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
 								},
-								"writeBehavior": "insert",
-								"sqlWriterUseTableLock": false,
-								"tableOption": "autoCreate",
-								"disableMetricsCollection": false
-							},
-							"enableStaging": false,
-							"enableSkipIncompatibleRow": true,
-							"logSettings": {
-								"enableCopyActivityLog": true,
-								"copyActivityLogSettings": {
-									"logLevel": "Warning",
-									"enableReliableLogging": false
-								},
-								"logLocationSettings": {
-									"linkedServiceName": {
-										"referenceName": "AzureBlobStorage1",
-										"type": "LinkedServiceReference"
-									}
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
 								}
 							},
+							"enableStaging": false,
 							"translator": {
 								"type": "TabularTranslator",
 								"typeConversion": true,
@@ -13160,38 +13391,18 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "archivo_texto_Data_Lake_coma",
+								"referenceName": "backupfarmades",
 								"type": "DatasetReference",
-								"parameters": {
-									"directorio": {
-										"value": "@pipeline().parameters.directorio",
-										"type": "Expression"
-									},
-									"contenedor": {
-										"value": "@pipeline().parameters.contenedor",
-										"type": "Expression"
-									},
-									"fichero": "1"
-								}
+								"parameters": {}
 							}
 						],
 						"outputs": [
 							{
-								"referenceName": "farma",
+								"referenceName": "archivos_parquet",
 								"type": "DatasetReference",
 								"parameters": {
-									"esquema": {
-										"value": "@pipeline().parameters.esquema",
-										"type": "Expression"
-									},
-									"tabla": {
-										"value": "@pipeline().parameters.tabla",
-										"type": "Expression"
-									},
-									"bbdd": {
-										"value": "@pipeline().parameters.bbdd",
-										"type": "Expression"
-									}
+									"contenedor": "salud",
+									"directorio": "maestrosmaestros_farmacias"
 								}
 							}
 						]
@@ -13200,87 +13411,14 @@
 				"policy": {
 					"elapsedTimeMetric": {}
 				},
-				"parameters": {
-					"contenedor": {
-						"type": "string",
-						"defaultValue": "salud"
-					},
-					"directorio": {
-						"type": "string",
-						"defaultValue": "direcciones/zonas_influencia"
-					},
-					"esquema": {
-						"type": "string",
-						"defaultValue": "staging"
-					},
-					"tabla": {
-						"type": "string",
-						"defaultValue": "zonas_influencia"
-					},
-					"bbdd": {
-						"type": "string",
-						"defaultValue": "farma"
-					}
-				},
 				"folder": {
 					"name": "2 DL to STG"
 				},
-				"annotations": [],
-				"lastPublishTime": "2024-01-26T11:11:19Z"
+				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/archivo_texto_Data_Lake_coma')]",
-				"[concat(variables('factoryId'), '/datasets/farma')]",
-				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorage1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/archivo_texto_Data_Lake_coma')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "storage_avron",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"directorio": {
-						"type": "string"
-					},
-					"contenedor": {
-						"type": "string"
-					},
-					"fichero": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().fichero",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().directorio",
-							"type": "Expression"
-						},
-						"fileSystem": {
-							"value": "@dataset().contenedor",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/storage_avron')]"
+				"[concat(variables('factoryId'), '/datasets/backupfarmades')]",
+				"[concat(variables('factoryId'), '/datasets/archivos_parquet')]"
 			]
 		}
 	]

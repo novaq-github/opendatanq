@@ -38,6 +38,12 @@
 		"storage_avron_accountKey": {
 			"value": ""
 		},
+		"nvqltalmactempfarmades_connectionString": {
+			"value": ""
+		},
+		"backupfarmades_connectionString": {
+			"value": ""
+		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {
 			"value": "https://afaemet.azurewebsites.net"
 		},

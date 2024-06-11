@@ -13,6 +13,2583 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/3 DATOS INE_RENTAS_MEDIAS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "HUB_MUNICIPIO",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nMunicipios_KEY, Cod_Municipio, max(LOAD_DTS) LOAD_DTS , max(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nwhere not exists( select 1 from open_data.INE.HUB_MUNICIPIOS h where h.Municipios_KEY= o.Municipios_KEY)\ngroup by Municipios_KEY, Cod_Municipio;\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_MUNICIPIOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "HUB_DISTRITOS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nDistritos_KEY, \nCod_Distritos , \nMAX(LOAD_DTS) LOAD_DTS , \nMAX(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE NOT EXISTS( \n  SELECT 1 \n  FROM open_data.INE.HUB_DISTRITOS h \n  WHERE h.Distritos_KEY = o.Distritos_KEY\n) and Cod_Distritos is not null\nGROUP BY Distritos_KEY, \nCod_Distritos;\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_DISTRITOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "SAT_MUNICIPIO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "HUB_MUNICIPIO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "\nSELECT \nMunicipios_KEY, Municipios , max(LOAD_DTS) START_DTS , CAST(NULL AS DATE) END_DTS, max(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nwhere not exists( select 1 from open_data.INE.SAT_MUNICIPIOS h where h.Municipios_KEY= o.Municipios_KEY)\ngroup by Municipios_KEY, Municipios;\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "SAT_MUNICIPIOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "SAT_DISTRITOS",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "HUB_DISTRITOS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nDistritos_KEY, \nDistritos , \nMAX(LOAD_DTS) START_DTS , CAST(NULL AS DATE) END_DTS, \nMAX(REC_SRC) REC_SRC  \n--INTO  INE.SAT_DISTRITOS\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS(   SELECT 1   FROM open_data.INE.SAT_DISTRITOS h   WHERE h.Distritos_KEY = o.Distritos_KEY AND START_DTS = O.LOAD_DTS ) and\nCod_Distritos is not null\nGROUP BY Distritos_KEY, \nDistritos;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "SAT_DISTRITOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "HUB_SECCIONES",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nSecciones_KEY, \nCod_Secciones, \nMAX(LOAD_DTS) LOAD_DTS, \nMAX(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE NOT EXISTS( \n  SELECT 1 \n  FROM open_data.INE.HUB_SECCIONES h \n  WHERE h.Secciones_KEY = o.Secciones_KEY\n) \nAND Secciones IS NOT NULL\nGROUP BY Secciones_KEY, Cod_Secciones;\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_SECCIONES"
+								}
+							}
+						]
+					},
+					{
+						"name": "SAT_SECCIONES",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "HUB_SECCIONES",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nSecciones_KEY, \nSecciones, \nMAX(LOAD_DTS) START_DTS , CAST(NULL AS DATE) END_DTS, \nMAX(REC_SRC) REC_SRC  \n--INTO INE.SAT_SECCIONES\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\n NOT EXISTS(   SELECT 1  FROM open_data.INE.SAT_SECCIONES h  WHERE h.Secciones_KEY = o.Secciones_KEY AND START_DTS = O.LOAD_DTS) AND\nSecciones IS NOT NULL\nGROUP BY Secciones_KEY, Secciones;\n\n\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "SAT_SECCIONES"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_SECCION_DISTRITO_MUNICIPIO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "SAT_SECCIONES",
+								"dependencyConditions": [
+									"Completed"
+								]
+							},
+							{
+								"activity": "SAT_DISTRITOS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							},
+							{
+								"activity": "SAT_MUNICIPIO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "\nSELECT \nMAX(CONVERT(nvarchar(32),(HASHBYTES('SHA2_256',concat(LTRIM(RTRIM(\"Municipios\")),LTRIM(RTRIM(\"Distritos\")),LTRIM(RTRIM(\"Secciones\")) ))),2)) as \"LINK_SECC_DIST_MUNIKEY\",\nMunicipios_KEY, Distritos_KEY, Secciones_KEY,\nMAX(LOAD_DTS) LOAD_DTS , MAX(REC_SRC) REC_SRC \n--INTO INE.LINK_SECCION_DISTRITO_MUNICIPIO\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE NOT EXISTS( SELECT 1 FROM INE.LINK_SECCION_DISTRITO_MUNICIPIO WHERE LINK_SECC_DIST_MUNIKEY=CONVERT(nvarchar(32),(HASHBYTES('SHA2_256',concat(LTRIM(RTRIM(\"Municipios\")),LTRIM(RTRIM(\"Distritos\")),LTRIM(RTRIM(\"Secciones\")) ))),2))\nGROUP BY Municipios_KEY, Distritos_KEY, Secciones_KEY;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_SECCION_DISTRITO_MUNICIPIO"
+								}
+							}
+						]
+					},
+					{
+						"name": "HUB_METRICAS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nmetrica_KEY , \nmetrica , \nMAX(LOAD_DTS) LOAD_DTS , \nMAX(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\n NOT EXISTS(   SELECT 1  FROM open_data.INE.HUB_METRICA h  WHERE h.metrica_KEY = o.metrica_KEY ) AND\nmetrica  IS NOT NULL\nGROUP BY metrica_KEY ,metrica;\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_METRICA"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_SECCION_DISTRITO_MUNICIPIO",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "HUB_METRICAS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_SECCION_METRICA_ANNO_KEY,\nSecciones_KEY ,\n metrica_KEY, \n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_SECCION_METRICA_ANNO WHERE LINK_DATOS_NIVEL_SECCION_METRICA_ANNO_KEY=LINK_KEY) and\nSecciones is not null ;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO_KEY,\nDistritos_KEY  ,\n metrica_KEY, \n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO WHERE LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO_KEY=LINK_KEY) and\nDistritos  is not null AND Secciones IS NULL ;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO_KEY,\nMunicipios_KEY  ,\n metrica_KEY, \n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO WHERE LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO_KEY=LINK_KEY) and\nDistritos  IS NULL ;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"ORIGEN": {
+						"type": "string",
+						"defaultValue": "INE_RENTAS_MEDIAS_HD"
+					}
+				},
+				"folder": {
+					"name": "3 STG TO DWH"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-03-06T18:00:34Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/3 DATOS INE_UMBRALES_MAX_MIN')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "HUB_MUNICIPIO",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nMunicipios_KEY, Cod_Municipio, max(LOAD_DTS) LOAD_DTS , max(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nwhere not exists( select 1 from open_data.INE.HUB_MUNICIPIOS h where h.Municipios_KEY= o.Municipios_KEY)\ngroup by Municipios_KEY, Cod_Municipio;\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_MUNICIPIOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "HUB_DISTRITOS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nDistritos_KEY, \nCod_Distritos , \nMAX(LOAD_DTS) LOAD_DTS , \nMAX(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE NOT EXISTS( \n  SELECT 1 \n  FROM open_data.INE.HUB_DISTRITOS h \n  WHERE h.Distritos_KEY = o.Distritos_KEY\n) and Cod_Distritos is not null\nGROUP BY Distritos_KEY, \nCod_Distritos;\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_DISTRITOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "SAT_MUNICIPIO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "HUB_MUNICIPIO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "\nSELECT \nMunicipios_KEY, Municipios , max(LOAD_DTS) START_DTS , CAST(NULL AS DATE) END_DTS, max(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nwhere not exists( select 1 from open_data.INE.SAT_MUNICIPIOS h where h.Municipios_KEY= o.Municipios_KEY)\ngroup by Municipios_KEY, Municipios;\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "SAT_MUNICIPIOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "SAT_DISTRITOS",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "HUB_DISTRITOS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nDistritos_KEY, \nDistritos , \nMAX(LOAD_DTS) START_DTS , CAST(NULL AS DATE) END_DTS, \nMAX(REC_SRC) REC_SRC  \n--INTO  INE.SAT_DISTRITOS\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS(   SELECT 1   FROM open_data.INE.SAT_DISTRITOS h   WHERE h.Distritos_KEY = o.Distritos_KEY AND START_DTS = O.LOAD_DTS ) and\nCod_Distritos is not null\nGROUP BY Distritos_KEY, \nDistritos;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "SAT_DISTRITOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "HUB_SECCIONES",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nSecciones_KEY, \nCod_Secciones, \nMAX(LOAD_DTS) LOAD_DTS, \nMAX(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE NOT EXISTS( \n  SELECT 1 \n  FROM open_data.INE.HUB_SECCIONES h \n  WHERE h.Secciones_KEY = o.Secciones_KEY\n) \nAND Secciones IS NOT NULL\nGROUP BY Secciones_KEY, Cod_Secciones;\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_SECCIONES"
+								}
+							}
+						]
+					},
+					{
+						"name": "SAT_SECCIONES",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "HUB_SECCIONES",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nSecciones_KEY, \nSecciones, \nMAX(LOAD_DTS) START_DTS , CAST(NULL AS DATE) END_DTS, \nMAX(REC_SRC) REC_SRC  \n--INTO INE.SAT_SECCIONES\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\n NOT EXISTS(   SELECT 1  FROM open_data.INE.SAT_SECCIONES h  WHERE h.Secciones_KEY = o.Secciones_KEY AND START_DTS = O.LOAD_DTS) AND\nSecciones IS NOT NULL\nGROUP BY Secciones_KEY, Secciones;\n\n\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "SAT_SECCIONES"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_SECCION_DISTRITO_MUNICIPIO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "SAT_SECCIONES",
+								"dependencyConditions": [
+									"Completed"
+								]
+							},
+							{
+								"activity": "SAT_DISTRITOS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							},
+							{
+								"activity": "SAT_MUNICIPIO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "\nSELECT \nMAX(CONVERT(nvarchar(32),(HASHBYTES('SHA2_256',concat(LTRIM(RTRIM(\"Municipios\")),LTRIM(RTRIM(\"Distritos\")),LTRIM(RTRIM(\"Secciones\")) ))),2)) as \"LINK_SECC_DIST_MUNIKEY\",\nMunicipios_KEY, Distritos_KEY, Secciones_KEY,\nMAX(LOAD_DTS) LOAD_DTS , MAX(REC_SRC) REC_SRC \n--INTO INE.LINK_SECCION_DISTRITO_MUNICIPIO\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE NOT EXISTS( SELECT 1 FROM INE.LINK_SECCION_DISTRITO_MUNICIPIO WHERE LINK_SECC_DIST_MUNIKEY=CONVERT(nvarchar(32),(HASHBYTES('SHA2_256',concat(LTRIM(RTRIM(\"Municipios\")),LTRIM(RTRIM(\"Distritos\")),LTRIM(RTRIM(\"Secciones\")) ))),2))\nGROUP BY Municipios_KEY, Distritos_KEY, Secciones_KEY;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_SECCION_DISTRITO_MUNICIPIO"
+								}
+							}
+						]
+					},
+					{
+						"name": "HUB_METRICAS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nmetrica_KEY , \nmetrica , \nMAX(LOAD_DTS) LOAD_DTS , \nMAX(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\n NOT EXISTS(   SELECT 1  FROM open_data.INE.HUB_METRICA h  WHERE h.metrica_KEY = o.metrica_KEY ) AND\nmetrica  IS NOT NULL\nGROUP BY metrica_KEY ,metrica;\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_METRICA"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_SECCION_DISTRITO_MUNICIPIO",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "HUB_METRICAS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_SECCION_METRICA_ANNO_KEY,\nSecciones_KEY ,\n metrica_KEY, \n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_SECCION_METRICA_ANNO WHERE LINK_DATOS_NIVEL_SECCION_METRICA_ANNO_KEY=LINK_KEY) and\nSecciones is not null \nAND Sexo = 'Total';",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO_KEY,\nDistritos_KEY  ,\n metrica_KEY, \n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO WHERE LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO_KEY=LINK_KEY) and\nDistritos  is not null AND Secciones IS NULL \nAND Sexo = 'Total' ;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO_KEY,\nMunicipios_KEY  ,\n metrica_KEY, \n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO WHERE LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO_KEY=LINK_KEY) and\nDistritos  IS NULL AND Sexo = 'Total';",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_SECCION_GENERO_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_SECCION_GENERO_METRICA_ANNO_KEY,\nSecciones_KEY ,\n metrica_KEY, \n anno,\n Sexo,\n valor_metrica, \nLOAD_DTS, REC_SRC\n--INTO open_data.INE.LINK_DATOS_NIVEL_SECCION_GENERO_METRICA_ANNO\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_SECCION_GENERO_METRICA_ANNO WHERE LINK_DATOS_NIVEL_SECCION_GENERO_METRICA_ANNO_KEY=LINK_KEY) and\nSecciones is not null \n;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_SECCION_GENERO_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_DISTRITO_GENERO_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_DISTRITO_GENERO_METRICA_ANNO_KEY,\nDistritos_KEY  ,\n metrica_KEY, \n Sexo,\n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_DISTRITO_GENERO_METRICA_ANNO WHERE LINK_DATOS_NIVEL_DISTRITO_GENERO_METRICA_ANNO_KEY=LINK_KEY) and\nDistritos  is not null AND Secciones IS NULL \nAND Sexo = 'Total' ;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_DISTRITO_GENERO_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_MUNICIPIO_GENERO_METRICA_ANNO_copy1",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_MUNICIPIO_METRICA_GENERO_ANNO_KEY,\nMunicipios_KEY  ,\n metrica_KEY, \n Sexo,\n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\n--INTO INE.LINK_DATOS_NIVEL_MUNICIPIO_METRICA_GENERO_ANNO\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_MUNICIPIO_METRICA_GENERO_ANNO WHERE LINK_DATOS_NIVEL_MUNICIPIO_METRICA_GENERO_ANNO_KEY=LINK_KEY) and\nDistritos  IS NULL;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_MUNICIPIO_METRICA_GENERO_ANNO"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"ORIGEN": {
+						"type": "string",
+						"defaultValue": "INE_UMBRALES_MIN_MAX_GENERO_HD"
+					}
+				},
+				"folder": {
+					"name": "3 STG TO DWH"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-03-08T18:31:35Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/3 DATOS INE_UMBRALES_RENTA')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "HUB_MUNICIPIO",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nMunicipios_KEY, Cod_Municipio, max(LOAD_DTS) LOAD_DTS , max(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nwhere not exists( select 1 from open_data.INE.HUB_MUNICIPIOS h where h.Municipios_KEY= o.Municipios_KEY)\ngroup by Municipios_KEY, Cod_Municipio;\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_MUNICIPIOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "HUB_DISTRITOS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nDistritos_KEY, \nCod_Distritos , \nMAX(LOAD_DTS) LOAD_DTS , \nMAX(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE NOT EXISTS( \n  SELECT 1 \n  FROM open_data.INE.HUB_DISTRITOS h \n  WHERE h.Distritos_KEY = o.Distritos_KEY\n) and Cod_Distritos is not null\nGROUP BY Distritos_KEY, \nCod_Distritos;\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_DISTRITOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "SAT_MUNICIPIO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "HUB_MUNICIPIO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "\nSELECT \nMunicipios_KEY, Municipios , max(LOAD_DTS) START_DTS , CAST(NULL AS DATE) END_DTS, max(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nwhere not exists( select 1 from open_data.INE.SAT_MUNICIPIOS h where h.Municipios_KEY= o.Municipios_KEY)\ngroup by Municipios_KEY, Municipios;\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "SAT_MUNICIPIOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "SAT_DISTRITOS",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "HUB_DISTRITOS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nDistritos_KEY, \nDistritos , \nMAX(LOAD_DTS) START_DTS , CAST(NULL AS DATE) END_DTS, \nMAX(REC_SRC) REC_SRC  \n--INTO  INE.SAT_DISTRITOS\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS(   SELECT 1   FROM open_data.INE.SAT_DISTRITOS h   WHERE h.Distritos_KEY = o.Distritos_KEY AND START_DTS = O.LOAD_DTS ) and\nCod_Distritos is not null\nGROUP BY Distritos_KEY, \nDistritos;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "SAT_DISTRITOS"
+								}
+							}
+						]
+					},
+					{
+						"name": "HUB_SECCIONES",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nSecciones_KEY, \nCod_Secciones, \nMAX(LOAD_DTS) LOAD_DTS, \nMAX(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE NOT EXISTS( \n  SELECT 1 \n  FROM open_data.INE.HUB_SECCIONES h \n  WHERE h.Secciones_KEY = o.Secciones_KEY\n) \nAND Secciones IS NOT NULL\nGROUP BY Secciones_KEY, Cod_Secciones;\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_SECCIONES"
+								}
+							}
+						]
+					},
+					{
+						"name": "SAT_SECCIONES",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "HUB_SECCIONES",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nSecciones_KEY, \nSecciones, \nMAX(LOAD_DTS) START_DTS , CAST(NULL AS DATE) END_DTS, \nMAX(REC_SRC) REC_SRC  \n--INTO INE.SAT_SECCIONES\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\n NOT EXISTS(   SELECT 1  FROM open_data.INE.SAT_SECCIONES h  WHERE h.Secciones_KEY = o.Secciones_KEY AND START_DTS = O.LOAD_DTS) AND\nSecciones IS NOT NULL\nGROUP BY Secciones_KEY, Secciones;\n\n\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "SAT_SECCIONES"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_SECCION_DISTRITO_MUNICIPIO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "SAT_SECCIONES",
+								"dependencyConditions": [
+									"Completed"
+								]
+							},
+							{
+								"activity": "SAT_DISTRITOS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							},
+							{
+								"activity": "SAT_MUNICIPIO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "\nSELECT \nMAX(CONVERT(nvarchar(32),(HASHBYTES('SHA2_256',concat(LTRIM(RTRIM(\"Municipios\")),LTRIM(RTRIM(\"Distritos\")),LTRIM(RTRIM(\"Secciones\")) ))),2)) as \"LINK_SECC_DIST_MUNIKEY\",\nMunicipios_KEY, Distritos_KEY, Secciones_KEY,\nMAX(LOAD_DTS) LOAD_DTS , MAX(REC_SRC) REC_SRC \n--INTO INE.LINK_SECCION_DISTRITO_MUNICIPIO\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE NOT EXISTS( SELECT 1 FROM INE.LINK_SECCION_DISTRITO_MUNICIPIO WHERE LINK_SECC_DIST_MUNIKEY=CONVERT(nvarchar(32),(HASHBYTES('SHA2_256',concat(LTRIM(RTRIM(\"Municipios\")),LTRIM(RTRIM(\"Distritos\")),LTRIM(RTRIM(\"Secciones\")) ))),2))\nGROUP BY Municipios_KEY, Distritos_KEY, Secciones_KEY;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_SECCION_DISTRITO_MUNICIPIO"
+								}
+							}
+						]
+					},
+					{
+						"name": "HUB_METRICAS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nmetrica_KEY , \nmetrica , \nMAX(LOAD_DTS) LOAD_DTS , \nMAX(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\n NOT EXISTS(   SELECT 1  FROM open_data.INE.HUB_METRICA h  WHERE h.metrica_KEY = o.metrica_KEY ) AND\nmetrica  IS NOT NULL\nGROUP BY metrica_KEY ,metrica;\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_METRICA"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_SECCION_DISTRITO_MUNICIPIO",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "HUB_METRICAS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_SECCION_METRICA_ANNO_KEY,\nSecciones_KEY ,\n metrica_KEY, \n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_SECCION_METRICA_ANNO WHERE LINK_DATOS_NIVEL_SECCION_METRICA_ANNO_KEY=LINK_KEY) and\nSecciones is not null \nAND Sexo = 'Total';",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO_KEY,\nDistritos_KEY  ,\n metrica_KEY, \n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO WHERE LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO_KEY=LINK_KEY) and\nDistritos  is not null AND Secciones IS NULL \nAND Sexo = 'Total' ;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO_KEY,\nMunicipios_KEY  ,\n metrica_KEY, \n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO WHERE LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO_KEY=LINK_KEY) and\nDistritos  IS NULL AND Sexo = 'Total';",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_SECCION_GENERO_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_SECCION_GENERO_METRICA_ANNO_KEY,\nSecciones_KEY ,\n metrica_KEY, \n anno,\n Sexo,\n valor_metrica, \nLOAD_DTS, REC_SRC\n--INTO open_data.INE.LINK_DATOS_NIVEL_SECCION_GENERO_METRICA_ANNO\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_SECCION_GENERO_METRICA_ANNO WHERE LINK_DATOS_NIVEL_SECCION_GENERO_METRICA_ANNO_KEY=LINK_KEY) and\nSecciones is not null \n;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_SECCION_GENERO_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_DISTRITO_GENERO_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO_KEY,\nDistritos_KEY  ,\n metrica_KEY, \n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO WHERE LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO_KEY=LINK_KEY) and\nDistritos  is not null AND Secciones IS NULL \nAND Sexo = 'Total' ;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_DISTRITO_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_MUNICIPIO_GENERO_METRICA_ANNO_copy1",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_MUNICIPIO_METRICA_GENERO_ANNO_KEY,\nMunicipios_KEY  ,\n metrica_KEY, \n Sexo,\n anno,\n valor_metrica, \nLOAD_DTS, REC_SRC\n--INTO INE.LINK_DATOS_NIVEL_MUNICIPIO_METRICA_GENERO_ANNO\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_MUNICIPIO_METRICA_GENERO_ANNO WHERE LINK_DATOS_NIVEL_MUNICIPIO_METRICA_GENERO_ANNO_KEY=LINK_KEY) and\nDistritos  IS NULL;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_MUNICIPIO_METRICA_ANNO"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"ORIGEN": {
+						"type": "string",
+						"defaultValue": "INE_UMBRALES_GENERO_HD"
+					}
+				},
+				"folder": {
+					"name": "3 STG TO DWH"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-11-01T18:12:15Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/4 calculos entrena farmas')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1929,6 +4506,153 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_csv_carpeta_comas')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DTS",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "archivo_texto_Data_Lake_coma",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									},
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"fichero": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									},
+									"bbdd": {
+										"value": "@pipeline().parameters.bbdd",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "salud"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "direcciones/zonas_influencia"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "zonas_influencia"
+					},
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-01-26T11:11:19Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_parquet_carpeta')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -2777,325 +5501,6 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2023-12-15T16:34:03Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/opensql_to_datalake')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "copiar_a_data_lake",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "AzureSqlSource",
-								"queryTimeout": "02:00:00",
-								"partitionOption": "None"
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "DWH_open_data",
-								"type": "DatasetReference",
-								"parameters": {
-									"esquema": {
-										"value": "@pipeline().parameters.esquema",
-										"type": "Expression"
-									},
-									"tabla": {
-										"value": "@pipeline().parameters.tabla",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "archivo_texto_Data_comas",
-								"type": "DatasetReference",
-								"parameters": {
-									"directorio": {
-										"value": "@pipeline().parameters.directorio",
-										"type": "Expression"
-									},
-									"contenedor": {
-										"value": "@pipeline().parameters.contenedor",
-										"type": "Expression"
-									},
-									"fichero": {
-										"value": "@pipeline().parameters.fichero",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"esquema": {
-						"type": "string",
-						"defaultValue": "CATASTRO"
-					},
-					"tabla": {
-						"type": "string",
-						"defaultValue": "link_portales_fincas_secciones"
-					},
-					"contenedor": {
-						"type": "string"
-					},
-					"directorio": {
-						"type": "string"
-					},
-					"fichero": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "99 Procesos puntuales"
-				},
-				"annotations": [],
-				"lastPublishTime": "2023-12-18T17:34:55Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/geo_loc')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "Odbc1",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"tabladestino": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "OdbcTable",
-				"schema": [],
-				"typeProperties": {
-					"tableName": {
-						"value": "@dataset().tabladestino",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/geol_loc')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "geoloc_desarrollo",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"esquema": {
-						"type": "string"
-					},
-					"tabla": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "PostgreSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().esquema",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().tabla",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_csv_carpeta_comas')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy data",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"additionalColumns": [
-									{
-										"name": "LOAD_DTS",
-										"value": {
-											"value": "@pipeline().TriggerTime",
-											"type": "Expression"
-										}
-									}
-								],
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"wildcardFileName": "*.csv",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "AzureSqlSink",
-								"preCopyScript": {
-									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
-									"type": "Expression"
-								},
-								"writeBehavior": "insert",
-								"sqlWriterUseTableLock": false,
-								"tableOption": "autoCreate",
-								"disableMetricsCollection": false
-							},
-							"enableStaging": false,
-							"enableSkipIncompatibleRow": true,
-							"logSettings": {
-								"enableCopyActivityLog": true,
-								"copyActivityLogSettings": {
-									"logLevel": "Warning",
-									"enableReliableLogging": false
-								},
-								"logLocationSettings": {
-									"linkedServiceName": {
-										"referenceName": "AzureBlobStorage1",
-										"type": "LinkedServiceReference"
-									}
-								}
-							},
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "archivo_texto_Data_Lake_coma",
-								"type": "DatasetReference",
-								"parameters": {
-									"directorio": {
-										"value": "@pipeline().parameters.directorio",
-										"type": "Expression"
-									},
-									"contenedor": {
-										"value": "@pipeline().parameters.contenedor",
-										"type": "Expression"
-									},
-									"fichero": "1"
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "farma",
-								"type": "DatasetReference",
-								"parameters": {
-									"esquema": {
-										"value": "@pipeline().parameters.esquema",
-										"type": "Expression"
-									},
-									"tabla": {
-										"value": "@pipeline().parameters.tabla",
-										"type": "Expression"
-									},
-									"bbdd": {
-										"value": "@pipeline().parameters.bbdd",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"contenedor": {
-						"type": "string",
-						"defaultValue": "salud"
-					},
-					"directorio": {
-						"type": "string",
-						"defaultValue": "direcciones/zonas_influencia"
-					},
-					"esquema": {
-						"type": "string",
-						"defaultValue": "staging"
-					},
-					"tabla": {
-						"type": "string",
-						"defaultValue": "zonas_influencia"
-					},
-					"bbdd": {
-						"type": "string",
-						"defaultValue": "farma"
-					}
-				},
-				"folder": {
-					"name": "2 DL to STG"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-01-26T11:11:19Z"
 			},
 			"dependsOn": []
 		}

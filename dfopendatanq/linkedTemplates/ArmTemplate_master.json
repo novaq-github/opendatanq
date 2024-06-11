@@ -51,6 +51,14 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'storage_avron'"
 		},
+		"nvqltalmactempfarmades_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'nvqltalmactempfarmades'"
+		},
+		"backupfarmades_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'backupfarmades'"
+		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {
 			"type": "string",
 			"defaultValue": "https://afaemet.azurewebsites.net"
@@ -121,6 +129,12 @@
 					},
 					"storage_avron_accountKey": {
 						"value": "[parameters('storage_avron_accountKey')]"
+					},
+					"nvqltalmactempfarmades_connectionString": {
+						"value": "[parameters('nvqltalmactempfarmades_connectionString')]"
+					},
+					"backupfarmades_connectionString": {
+						"value": "[parameters('backupfarmades_connectionString')]"
 					},
 					"AFAemet_properties_typeProperties_functionAppUrl": {
 						"value": "[parameters('AFAemet_properties_typeProperties_functionAppUrl')]"

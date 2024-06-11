@@ -29,6 +29,86 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/carga calculos_datos_farmacias')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "farmacias",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference",
+							"parameters": {
+								"bbdd": "farma"
+							}
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "\r\nCREATE TABLE farma.calculos.datos_farmacias_2 (\r\n\thash_codigo_centro nvarchar(64) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,\r\n\tnombre_oficial nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tfecha_primera_apertura date NULL,\r\n\tfecha_ultimo_cambio_administrativo date NULL,\r\n\tdireccion_oficial nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tdireccion_normalizada nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tprecision_normalización float NULL,\r\n\tprecision_busqueda_place float NULL,\r\n\tlatitud float NULL,\r\n\tlongitud float NULL,\r\n\thorario nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\testado nvarchar(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tplace_id nvarchar(150) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tnombre_google nvarchar(200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tafluencia nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tratio_valoracion nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tcomentarios_por_ratio nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tlink_centro nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tinformacion_servicios nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tServicios_centro nvarchar(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,\r\n\tgeo_coordenadas geography NULL\r\n\t);\r\n\r\n--TRUNCATE TABLE calculos.datos_farmacias_2;\r\n\r\n\r\n\r\nSELECT\r\nCOALESCE (s2.cod_bbdd, concat('sin_bbdd_', p.place_id)) cod_bbdd,\r\nCOALESCE (l.hash_codigo_centro, concat('sin_hash_centro_', p.place_id)) hash_codigo_centro,\r\nCOALESCE (s2.nombre_cod_bbdd , p.name) nombre_oficial,\r\np.place_id ,\r\nCOALESCE (s2.dir_normalizada_cod_farma, p.full_address) direccion_oficial,\r\nTRY_CONVERT(date, fecha_autorizacion_funcionamiento) AS   fecha_primera_apertura,\r\nTRY_CONVERT(date, fecha_ultima_autorizacion) AS  fecha_ultimo_cambio_administrativo,\r\np.full_address  direccion_normalizada,\r\ns2.semejanza_dir_place precision_normalización\r\n,(try_convert(float,s2.semejanza_dir_place) +try_convert(float,s2.semejanza_cp_place))/2  precision_busqueda_place,\r\nTRY_CONVERT(float,p.latitude) latitud,\r\nTRY_CONVERT(float,p.longitude) longitud,\r\np.working_hours horario,\r\np.business_status estado,\r\np.name  nombre_google,\r\np.popular_times afluencia,\r\np.rating ratio_valoracion,\r\np.reviews_per_score comentarios_por_ratio,\r\np.street_view link_centro,\r\np.about informacion_servicios\r\n,ser_cen.Servicios_centro\r\n--count(*) , count(DISTINCT p.place_id) , count( DISTINCT COALESCE(p.place_id, s2.cod_bbdd  , l.hash_codigo_centro  ) )\r\ninto calculos.temp_calculo_farmacias\r\nFROM farma.MAESTROS.pip_sat_place p\r\nleft  JOIN \r\n    (SELECT *, ROW_NUMBER() OVER (PARTITION BY place_id ORDER BY semejanza_dir_place DESC) as rn \r\n     FROM calculos.ranking_direcciones_normalizadas) as l ON l.place_id = p.place_id AND l.rn = 1\r\nleft JOIN \r\n    (SELECT *, ROW_NUMBER() OVER (PARTITION BY place_id ORDER BY semejanza_dir_place DESC) as rn \r\n     FROM farma.MAESTROS.sat_similitud_direcciones_cod_bbdd) as s2 ON s2.place_id = p.place_id AND s2.rn = 1\r\nleft join \r\n     MAESTROS.SAT_CENTRO_FECHAS_ADMIN s4 on s4.hash_codigo_centro= l.hash_codigo_centro and s4.ACTIVE_RECORD_INDICATOR ='S'\r\nleft join MAESTROS.referencia_ubicaciones_multicentros ser_cen on ser_cen.address_label= s2.dir_normalizada_cod_farma\r\nwhere     \"type\" IN('Pharmacy', 'Farmacia')  and TRY_CONVERT(float,p.latitude) is not null and TRY_CONVERT(float,p.longitude) is not null\r\n\r\n\r\n\r\n\r\ninsert into calculos.datos_farmacias_2 (hash_codigo_centro, nombre_oficial, fecha_primera_apertura, fecha_ultimo_cambio_administrativo, direccion_oficial, direccion_normalizada, precision_normalización, precision_busqueda_place, latitud, longitud, horario, estado,place_id, nombre_google, afluencia, ratio_valoracion, comentarios_por_ratio, link_centro, informacion_servicios, Servicios_centro, geo_coordenadas)\r\nSELECT \r\nhash_codigo_centro, nombre_oficial, fecha_primera_apertura, fecha_ultimo_cambio_administrativo, \r\ndireccion_oficial, direccion_normalizada, precision_normalización, precision_busqueda_place,\r\nlatitud, longitud, horario, estado,place_id, nombre_google, afluencia, ratio_valoracion,\r\ncomentarios_por_ratio, link_centro, informacion_servicios, Servicios_centro\r\n,geography::Point(latitud, longitud, 4326) AS geo_coordenadas\r\n--into calculos.datos_farmacias_2\r\nFROM calculos.temp_calculo_farmacias p\r\nJOIN (select DISTINCT golden_record from  MAESTROS.LINK_DUPLICADOS_PLACE_FARMACIAS L \r\njoin MAESTROS.SAT_DUPLICADOS_PLACE_FARMACIAS S ON S.key_link_deduplicados_farmas= L.key_link_deduplicados_farmas\r\nWHERE  proba_duplicado >0.55) DUP ON DUP.golden_record= p.place_id\r\nWHERE \r\n    p.latitud IS NOT NULL AND p.longitud IS NOT NULL\r\n    AND p.latitud BETWEEN -90 AND 90 AND p.longitud BETWEEN -180 AND 180\r\n;\r\nEXEC farma.sys.sp_rename N'farma.calculos.datos_farmacias', N'datos_farmacias_old', 'OBJECT';\r\nEXEC farma.sys.sp_rename N'farma.calculos.datos_farmacias_2', N'datos_farmacias', 'OBJECT';\r\n\r\ndrop table calculos.datos_farmacias_old;\r\ndrop table calculos.temp_calculo_farmacias;\r\n\r\n\r\nWITH CTE AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER(PARTITION BY hash_codigo_centro  ORDER BY (SELECT NULL)) AS rn\r\n    FROM calculos.datos_farmacias\r\n)\r\nDELETE FROM CTE WHERE rn > 1;\r\n\r\n\r\nALTER TABLE calculos.datos_farmacias ADD CONSTRAINT PK_hash_codigo_centro PRIMARY KEY CLUSTERED (hash_codigo_centro);\r\nCREATE SPATIAL INDEX idx_geoespacial_datos_farmacia ON calculos.datos_farmacias(geo_coordenadas);\r\n\r\n"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "4 DWH- DM"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-04-01T16:53:24Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/APK2DB')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "APK2DB",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"ESQUEMA": {
+						"type": "string"
+					},
+					"TABLA": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().ESQUEMA",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().TABLA",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Avro1')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -292,6 +372,53 @@
 						"type": "String"
 					}
 				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/archivo_texto_Data_Lake_coma')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "storage_avron",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"directorio": {
+						"type": "string"
+					},
+					"contenedor": {
+						"type": "string"
+					},
+					"fichero": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fichero",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@dataset().directorio",
+							"type": "Expression"
+						},
+						"fileSystem": {
+							"value": "@dataset().contenedor",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
 			},
 			"dependsOn": []
 		},
@@ -636,409 +763,27 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/archivo_texto_Data_Lake_coma')]",
+			"name": "[concat(parameters('factoryName'), '/backupfarmades')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "storage_avron",
+					"referenceName": "backupfarmades",
 					"type": "LinkedServiceReference"
 				},
-				"parameters": {
-					"directorio": {
-						"type": "string"
-					},
-					"contenedor": {
-						"type": "string"
-					},
-					"fichero": {
-						"type": "string"
-					}
-				},
 				"annotations": [],
-				"type": "DelimitedText",
+				"type": "Excel",
 				"typeProperties": {
+					"sheetName": "Hoja1",
 					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().fichero",
-							"type": "Expression"
-						},
-						"folderPath": {
-							"value": "@dataset().directorio",
-							"type": "Expression"
-						},
-						"fileSystem": {
-							"value": "@dataset().contenedor",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
+						"type": "AzureFileStorageLocation",
+						"fileName": "MAESTRO_FARMACIAS.xlsx",
+						"folderPath": "BBC001/MAESTRO_FARMACIAS"
+					}
 				},
 				"schema": []
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/1 AEMET ESTACIONES_METEOROLOGICAS')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "peticion_url_estaciones",
-						"type": "WebActivity",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"method": "GET",
-							"headers": {
-								"api_key": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWNhcmRvLmNhbWFjaG9Abm92YXF1YWxpdHkuZXMiLCJqdGkiOiIxMjljNWQzYS1jZWFlLTQ5ZWYtODQ2OS05ZmJjZjY5YzIyMTUiLCJpc3MiOiJBRU1FVCIsImlhdCI6MTY2OTE4NjA4NywidXNlcklkIjoiMTI5YzVkM2EtY2VhZS00OWVmLTg0NjktOWZiY2Y2OWMyMjE1Iiwicm9sZSI6IiJ9.xtPVH8hEwLGRCmyL8Xccv7s2bNVB-wbVL7XSOP1VipM",
-								"cache-control": "no-cache"
-							},
-							"url": "https://opendata.aemet.es/opendata/api/valores/climatologicos/inventarioestaciones/todasestaciones"
-						}
-					},
-					{
-						"name": "copia_observacion_diaria",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "peticion_url_estaciones",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "RestSource",
-								"additionalColumns": [
-									{
-										"name": "LOAD_DATE",
-										"value": {
-											"value": "@pipeline().TriggerTime",
-											"type": "Expression"
-										}
-									},
-									{
-										"name": "REC_SRC",
-										"value": "API AEMET"
-									}
-								],
-								"httpRequestTimeout": "00:01:40",
-								"requestInterval": "00.00:00:00.010",
-								"requestMethod": "GET",
-								"paginationRules": {
-									"supportRFC5988": "true"
-								}
-							},
-							"sink": {
-								"type": "AvroSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "AvroWriteSettings"
-								}
-							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "scr_aemet",
-								"type": "DatasetReference",
-								"parameters": {
-									"url_datos_aemet": {
-										"value": "@activity('peticion_url_estaciones').output.datos",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "Avro1",
-								"type": "DatasetReference",
-								"parameters": {
-									"directorio": "estaciones",
-									"fichero": {
-										"value": "@concat('estaciones_',utcNow('dd'),'.avro')",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "1 Source to Data_Lake"
-				},
-				"annotations": [],
-				"lastPublishTime": "2023-03-13T11:29:38Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/scr_aemet')]",
-				"[concat(variables('factoryId'), '/datasets/Avro1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/1 AEMET OBSERVACION_HISTORICA_OLD')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "peticion_url_obserbaciones",
-						"type": "WebActivity",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"method": "GET",
-							"headers": {
-								"api_key": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWNhcmRvLmNhbWFjaG9Abm92YXF1YWxpdHkuZXMiLCJqdGkiOiIxMjljNWQzYS1jZWFlLTQ5ZWYtODQ2OS05ZmJjZjY5YzIyMTUiLCJpc3MiOiJBRU1FVCIsImlhdCI6MTY2OTE4NjA4NywidXNlcklkIjoiMTI5YzVkM2EtY2VhZS00OWVmLTg0NjktOWZiY2Y2OWMyMjE1Iiwicm9sZSI6IiJ9.xtPVH8hEwLGRCmyL8Xccv7s2bNVB-wbVL7XSOP1VipM",
-								"cache-control": "no-cache"
-							},
-							"url": "https://opendata.aemet.es/opendata/api/valores/climatologicos/diarios/datos/fechaini/2023-03-01T00:00:00UTC/fechafin/2023-03-13T23:59:59UTC/todasestaciones"
-						}
-					},
-					{
-						"name": "copia_observacion_diaria",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "peticion_url_obserbaciones",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "RestSource",
-								"additionalColumns": [
-									{
-										"name": "LOAD_DATE",
-										"value": {
-											"value": "@pipeline().TriggerTime",
-											"type": "Expression"
-										}
-									},
-									{
-										"name": "REC_SRC",
-										"value": "'https://opendata.aemet.es/opendata/api/observacion/convencional/todas'"
-									}
-								],
-								"httpRequestTimeout": "00:01:40",
-								"requestInterval": "00.00:00:00.010",
-								"requestMethod": "GET",
-								"paginationRules": {
-									"supportRFC5988": "true"
-								}
-							},
-							"sink": {
-								"type": "AzureSqlSink",
-								"writeBehavior": "insert",
-								"sqlWriterUseTableLock": false,
-								"tableOption": "autoCreate",
-								"disableMetricsCollection": false
-							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "scr_aemet",
-								"type": "DatasetReference",
-								"parameters": {
-									"url_datos_aemet": {
-										"value": "@activity('peticion_url_obserbaciones').output.datos",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DWH_open_data",
-								"type": "DatasetReference",
-								"parameters": {
-									"esquema": "STG",
-									"tabla": "AEMET_OBSERVACION_ESTACION_DIA"
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "1 Source to Data_Lake"
-				},
-				"annotations": [],
-				"lastPublishTime": "2023-05-11T08:12:25Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/scr_aemet')]",
-				"[concat(variables('factoryId'), '/datasets/DWH_open_data')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/1 AEMET OBSERVACION_HORARIA')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "peticion_url_observaciones",
-						"type": "WebActivity",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"method": "GET",
-							"headers": {
-								"api_key": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWNhcmRvLmNhbWFjaG9Abm92YXF1YWxpdHkuZXMiLCJqdGkiOiIxMjljNWQzYS1jZWFlLTQ5ZWYtODQ2OS05ZmJjZjY5YzIyMTUiLCJpc3MiOiJBRU1FVCIsImlhdCI6MTY2OTE4NjA4NywidXNlcklkIjoiMTI5YzVkM2EtY2VhZS00OWVmLTg0NjktOWZiY2Y2OWMyMjE1Iiwicm9sZSI6IiJ9.xtPVH8hEwLGRCmyL8Xccv7s2bNVB-wbVL7XSOP1VipM",
-								"cache-control": "no-cache"
-							},
-							"url": "https://opendata.aemet.es/opendata/api/observacion/convencional/todas"
-						}
-					},
-					{
-						"name": "copia_observacion_diaria",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "peticion_url_observaciones",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "RestSource",
-								"additionalColumns": [
-									{
-										"name": "LOAD_DATE",
-										"value": {
-											"value": "@pipeline().TriggerTime",
-											"type": "Expression"
-										}
-									},
-									{
-										"name": "REC_SRC",
-										"value": "'https://opendata.aemet.es/opendata/api/observacion/convencional/todas'"
-									}
-								],
-								"httpRequestTimeout": "00:01:40",
-								"requestInterval": "00.00:00:00.010",
-								"requestMethod": "GET",
-								"paginationRules": {
-									"supportRFC5988": "true"
-								}
-							},
-							"sink": {
-								"type": "AvroSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "AvroWriteSettings"
-								}
-							},
-							"enableStaging": false
-						},
-						"inputs": [
-							{
-								"referenceName": "scr_aemet",
-								"type": "DatasetReference",
-								"parameters": {
-									"url_datos_aemet": {
-										"value": "@activity('peticion_url_observaciones').output.datos",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "Avro1",
-								"type": "DatasetReference",
-								"parameters": {
-									"directorio": "observacion_diaria",
-									"fichero": {
-										"value": "@concat('observacion_diaria_',pipeline().TriggerTime)",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "1 Source to Data_Lake"
-				},
-				"annotations": [],
-				"lastPublishTime": "2023-03-14T16:52:32Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/scr_aemet')]",
-				"[concat(variables('factoryId'), '/datasets/Avro1')]"
-			]
 		}
 	]
 }
