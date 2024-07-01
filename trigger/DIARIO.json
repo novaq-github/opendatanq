@@ -22,7 +22,7 @@
 			"recurrence": {
 				"frequency": "Day",
 				"interval": 1,
-				"startTime": "2022-11-28T18:29:00Z",
+				"startTime": "2023-11-28T18:29:00Z",
 				"timeZone": "UTC",
 				"schedule": {
 					"hours": [
