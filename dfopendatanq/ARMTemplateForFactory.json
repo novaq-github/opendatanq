@@ -35,6 +35,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'Odbc1'"
 		},
+		"backupfarmades_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'backupfarmades'"
+		},
 		"farma_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'farma'"
@@ -43,6 +47,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'geoloc_desarrollo'"
 		},
+		"nvqltalmactempfarmades_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'nvqltalmactempfarmades'"
+		},
 		"pefformance_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'pefformance'"
@@ -50,14 +58,6 @@
 		"storage_avron_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'storage_avron'"
-		},
-		"nvqltalmactempfarmades_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'nvqltalmactempfarmades'"
-		},
-		"backupfarmades_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'backupfarmades'"
 		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {
 			"type": "string",
@@ -2679,6 +2679,84 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DelimitedText_comas')]",
 				"[concat(variables('factoryId'), '/datasets/DWH_open_data')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/2 copia maestro_farmacias_excel')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "copia maestro_farmacias_excel",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ExcelSource",
+								"storeSettings": {
+									"type": "AzureFileStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "backupfarmades",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "archivos_parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"contenedor": "salud",
+									"directorio": "maestros/maestros_farmacias"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/backupfarmades')]",
+				"[concat(variables('factoryId'), '/datasets/archivos_parquet')]"
 			]
 		},
 		{
@@ -12593,6 +12671,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
+						"fileName": "maestro_farmacia",
 						"folderPath": {
 							"value": "@dataset().directorio",
 							"type": "Expression"
@@ -12608,6 +12687,32 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/backupfarmades')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "backupfarmades",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Excel",
+				"typeProperties": {
+					"sheetName": "Hoja1",
+					"location": {
+						"type": "AzureFileStorageLocation",
+						"fileName": "MAESTRO_FARMACIAS.xlsx",
+						"folderPath": "BBC001/MAESTRO_FARMACIAS"
+					},
+					"firstRowAsHeader": true
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/backupfarmades')]"
 			]
 		},
 		{
@@ -12795,11 +12900,11 @@
 				"type": "AzureFunction",
 				"typeProperties": {
 					"functionAppUrl": "[parameters('AFAemet_properties_typeProperties_functionAppUrl')]",
+					"authentication": "Anonymous",
 					"functionKey": {
 						"type": "SecureString",
 						"value": "[parameters('AFAemet_functionKey')]"
-					},
-					"authentication": "Anonymous"
+					}
 				}
 			},
 			"dependsOn": []
@@ -12889,6 +12994,20 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/backupfarmades')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureFileStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('backupfarmades_connectionString')]",
+					"fileShare": "backupfarmades"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/farma')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -12925,6 +13044,19 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/integrationRuntimes/integrationRuntimelocal')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/nvqltalmactempfarmades')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('nvqltalmactempfarmades_connectionString')]"
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/pefformance')]",
@@ -12990,6 +13122,13 @@
 							"type": "PipelineReference"
 						},
 						"parameters": {}
+					},
+					{
+						"pipelineReference": {
+							"referenceName": "2 copia maestro_farmacias_excel",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
 					}
 				],
 				"type": "ScheduleTrigger",
@@ -12997,7 +13136,7 @@
 					"recurrence": {
 						"frequency": "Day",
 						"interval": 1,
-						"startTime": "2022-11-28T18:29:00Z",
+						"startTime": "2023-11-28T18:29:00Z",
 						"timeZone": "UTC",
 						"schedule": {
 							"hours": [
@@ -13008,7 +13147,8 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/5 AEMET OBSERVACION_DIARIA')]"
+				"[concat(variables('factoryId'), '/pipelines/5 AEMET OBSERVACION_DIARIA')]",
+				"[concat(variables('factoryId'), '/pipelines/2 copia maestro_farmacias_excel')]"
 			]
 		},
 		{
@@ -13290,137 +13430,6 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/nvqltalmactempfarmades')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('nvqltalmactempfarmades_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/backupfarmades')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureFileStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('backupfarmades_connectionString')]",
-					"fileShare": "backupfarmades"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/backupfarmades')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "backupfarmades",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Excel",
-				"typeProperties": {
-					"sheetName": "Hoja1",
-					"location": {
-						"type": "AzureFileStorageLocation",
-						"fileName": "MAESTRO_FARMACIAS.xlsx",
-						"folderPath": "BBC001/MAESTRO_FARMACIAS"
-					},
-					"firstRowAsHeader": true
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/backupfarmades')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/2 copia maestro_farmacias_excel')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "copia maestro_farmacias_excel",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "ExcelSource",
-								"storeSettings": {
-									"type": "AzureFileStorageReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								}
-							},
-							"sink": {
-								"type": "ParquetSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "ParquetWriteSettings"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "backupfarmades",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "archivos_parquet",
-								"type": "DatasetReference",
-								"parameters": {
-									"contenedor": "salud",
-									"directorio": "maestros/maestros_farmacias"
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "2 DL to STG"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/backupfarmades')]",
-				"[concat(variables('factoryId'), '/datasets/archivos_parquet')]"
-			]
 		}
 	]
 }

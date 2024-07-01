@@ -13,6 +13,287 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/3 DATOS INE_PADRON_EDAD_SEXO')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "HUB_METRICAS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nmetrica_KEY , \nmetrica , \nMAX(LOAD_DTS) LOAD_DTS , \nMAX(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\n NOT EXISTS(   SELECT 1  FROM open_data.INE.HUB_METRICA h  WHERE h.metrica_KEY = o.metrica_KEY ) AND\nmetrica  IS NOT NULL\nGROUP BY metrica_KEY ,metrica;\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_METRICA"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "HUB_METRICAS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_SECCION_METRICA_ANNO_KEY,\nSecciones_KEY ,\n metrica_KEY, \n anno,\n cast(valor as float) valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_SECCION_METRICA_ANNO WHERE LINK_DATOS_NIVEL_SECCION_METRICA_ANNO_KEY=LINK_KEY) ;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO"
+								}
+							}
+						]
+					},
+					{
+						"name": "HUB_METRICAS_copy1",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nmetrica_KEY , \nmetrica , \nMAX(LOAD_DTS) LOAD_DTS , \nMAX(REC_SRC) REC_SRC  \nFROM open_data.STG.@{pipeline().parameters.ORIGEN_2} o\nWHERE\n NOT EXISTS(   SELECT 1  FROM open_data.INE.HUB_METRICA h  WHERE h.metrica_KEY = o.metrica_KEY ) AND\nmetrica  IS NOT NULL\nGROUP BY metrica_KEY ,metrica;\n\n",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "HUB_METRICA"
+								}
+							}
+						]
+					},
+					{
+						"name": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO_copy1",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "HUB_METRICAS_copy1",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT \nLINK_KEY LINK_DATOS_NIVEL_SECCION_METRICA_ANNO_KEY,\nSecciones_KEY ,\n metrica_KEY, \n anno,\n cast(valor as float) valor_metrica, \nLOAD_DTS, REC_SRC\nFROM open_data.STG.@{pipeline().parameters.ORIGEN_2} o\nWHERE\nNOT EXISTS( SELECT 1 FROM INE.LINK_DATOS_NIVEL_SECCION_METRICA_ANNO WHERE LINK_DATOS_NIVEL_SECCION_METRICA_ANNO_KEY=LINK_KEY) ;",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "1",
+									"tabla": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "INE",
+									"tabla": "LINK_DATOS_NIVEL_SECCION_METRICA_ANNO"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"ORIGEN": {
+						"type": "string",
+						"defaultValue": "INE_PADRON_EDAD_SEXO_HD"
+					},
+					"ORIGEN_2": {
+						"type": "string",
+						"defaultValue": "INE_PADRON_EDAD_PAIS_NACIMIENTO_HD"
+					}
+				},
+				"folder": {
+					"name": "3 STG TO DWH"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-07-24T17:42:29Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/3 DATOS INE_RENTAS_MEDIAS')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -5355,152 +5636,6 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2023-11-22T17:32:50Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/data_lake_to_opendata_comas')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy data",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"additionalColumns": [
-									{
-										"name": "LOAD_DTS",
-										"value": {
-											"value": "@pipeline().TriggerTime",
-											"type": "Expression"
-										}
-									}
-								],
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "AzureSqlSink",
-								"preCopyScript": {
-									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
-									"type": "Expression"
-								},
-								"writeBehavior": "insert",
-								"sqlWriterUseTableLock": false,
-								"tableOption": "autoCreate",
-								"disableMetricsCollection": false
-							},
-							"enableStaging": false,
-							"enableSkipIncompatibleRow": true,
-							"logSettings": {
-								"enableCopyActivityLog": true,
-								"copyActivityLogSettings": {
-									"logLevel": "Warning",
-									"enableReliableLogging": false
-								},
-								"logLocationSettings": {
-									"linkedServiceName": {
-										"referenceName": "AzureBlobStorage1",
-										"type": "LinkedServiceReference"
-									},
-									"path": ""
-								}
-							},
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "archivo_texto_Data_comas",
-								"type": "DatasetReference",
-								"parameters": {
-									"directorio": {
-										"value": "@pipeline().parameters.directorio",
-										"type": "Expression"
-									},
-									"contenedor": {
-										"value": "@pipeline().parameters.contenedor",
-										"type": "Expression"
-									},
-									"fichero": {
-										"value": "@pipeline().parameters.fichero",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DWH_open_data",
-								"type": "DatasetReference",
-								"parameters": {
-									"esquema": {
-										"value": "@pipeline().parameters.esquema",
-										"type": "Expression"
-									},
-									"tabla": {
-										"value": "@pipeline().parameters.tabla",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"contenedor": {
-						"type": "string",
-						"defaultValue": "pois"
-					},
-					"directorio": {
-						"type": "string",
-						"defaultValue": "scraping"
-					},
-					"fichero": {
-						"type": "string",
-						"defaultValue": "datos_backup.csv"
-					},
-					"esquema": {
-						"type": "string",
-						"defaultValue": "staging"
-					},
-					"tabla": {
-						"type": "string",
-						"defaultValue": "pois_scraping"
-					}
-				},
-				"folder": {
-					"name": "2 DL to STG"
-				},
-				"annotations": [],
-				"lastPublishTime": "2023-12-15T16:34:03Z"
 			},
 			"dependsOn": []
 		}

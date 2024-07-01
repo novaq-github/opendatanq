@@ -26,22 +26,22 @@
 		"Odbc1_password": {
 			"value": ""
 		},
+		"backupfarmades_connectionString": {
+			"value": ""
+		},
 		"farma_connectionString": {
 			"value": ""
 		},
 		"geoloc_desarrollo_connectionString": {
 			"value": ""
 		},
+		"nvqltalmactempfarmades_connectionString": {
+			"value": ""
+		},
 		"pefformance_connectionString": {
 			"value": ""
 		},
 		"storage_avron_accountKey": {
-			"value": ""
-		},
-		"nvqltalmactempfarmades_connectionString": {
-			"value": ""
-		},
-		"backupfarmades_connectionString": {
 			"value": ""
 		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {

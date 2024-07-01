@@ -35,6 +35,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'Odbc1'"
 		},
+		"backupfarmades_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'backupfarmades'"
+		},
 		"farma_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'farma'"
@@ -43,6 +47,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'geoloc_desarrollo'"
 		},
+		"nvqltalmactempfarmades_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'nvqltalmactempfarmades'"
+		},
 		"pefformance_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'pefformance'"
@@ -50,14 +58,6 @@
 		"storage_avron_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'storage_avron'"
-		},
-		"nvqltalmactempfarmades_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'nvqltalmactempfarmades'"
-		},
-		"backupfarmades_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'backupfarmades'"
 		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {
 			"type": "string",
@@ -121,20 +121,20 @@
 					"DWH_open_data_connectionString": {
 						"value": "[parameters('DWH_open_data_connectionString')]"
 					},
+					"backupfarmades_connectionString": {
+						"value": "[parameters('backupfarmades_connectionString')]"
+					},
 					"farma_connectionString": {
 						"value": "[parameters('farma_connectionString')]"
+					},
+					"nvqltalmactempfarmades_connectionString": {
+						"value": "[parameters('nvqltalmactempfarmades_connectionString')]"
 					},
 					"pefformance_connectionString": {
 						"value": "[parameters('pefformance_connectionString')]"
 					},
 					"storage_avron_accountKey": {
 						"value": "[parameters('storage_avron_accountKey')]"
-					},
-					"nvqltalmactempfarmades_connectionString": {
-						"value": "[parameters('nvqltalmactempfarmades_connectionString')]"
-					},
-					"backupfarmades_connectionString": {
-						"value": "[parameters('backupfarmades_connectionString')]"
 					},
 					"AFAemet_properties_typeProperties_functionAppUrl": {
 						"value": "[parameters('AFAemet_properties_typeProperties_functionAppUrl')]"
