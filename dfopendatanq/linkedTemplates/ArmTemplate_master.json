@@ -4,60 +4,60 @@
 	"parameters": {
 		"factoryName": {
 			"type": "string",
-			"metadata": "Data Factory name",
+			"metadata": "Nombre de instancia de Data Factory",
 			"defaultValue": "dfopendatanq"
 		},
 		"AFAemet_functionKey": {
 			"type": "secureString",
-			"metadata": "Secure string for 'functionKey' of 'AFAemet'"
+			"metadata": "Cadena protegida para \"functionKey\"de \"AFAemet\""
 		},
 		"APK2DB_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'APK2DB'"
+			"metadata": "Cadena protegida para \"connectionString\"de \"APK2DB\""
 		},
 		"AzureBlobStorage1_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
+			"metadata": "Cadena protegida para \"connectionString\"de \"AzureBlobStorage1\""
 		},
 		"AzureDataLakeStorage1_accountKey": {
 			"type": "secureString",
-			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+			"metadata": "Cadena protegida para \"accountKey\"de \"AzureDataLakeStorage1\""
 		},
 		"DWH_open_data_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'DWH_open_data'"
+			"metadata": "Cadena protegida para \"connectionString\"de \"DWH_open_data\""
 		},
 		"Odbc1_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'Odbc1'"
+			"metadata": "Cadena protegida para \"connectionString\"de \"Odbc1\""
 		},
 		"Odbc1_password": {
 			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'Odbc1'"
+			"metadata": "Cadena protegida para \"password\"de \"Odbc1\""
 		},
 		"backupfarmades_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'backupfarmades'"
+			"metadata": "Cadena protegida para \"connectionString\"de \"backupfarmades\""
 		},
 		"farma_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'farma'"
+			"metadata": "Cadena protegida para \"connectionString\"de \"farma\""
 		},
 		"geoloc_desarrollo_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'geoloc_desarrollo'"
+			"metadata": "Cadena protegida para \"connectionString\"de \"geoloc_desarrollo\""
 		},
 		"nvqltalmactempfarmades_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'nvqltalmactempfarmades'"
+			"metadata": "Cadena protegida para \"connectionString\"de \"nvqltalmactempfarmades\""
 		},
 		"pefformance_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'pefformance'"
+			"metadata": "Cadena protegida para \"connectionString\"de \"pefformance\""
 		},
 		"storage_avron_accountKey": {
 			"type": "secureString",
-			"metadata": "Secure string for 'accountKey' of 'storage_avron'"
+			"metadata": "Cadena protegida para \"accountKey\"de \"storage_avron\""
 		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {
 			"type": "string",
@@ -77,15 +77,15 @@
 		},
 		"storage_avron_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://opendatanq.dfs.core.windows.net/"
+			"defaultValue": "https://nvqltopendatanqdes.dfs.core.windows.net/"
 		},
 		"containerUri": {
 			"type": "string",
-			"metadata": "URI to storage account containing linked ARM templates"
+			"metadata": "URI de la cuenta de almacenamiento que contiene las plantillas de ARM vinculadas."
 		},
 		"containerSasToken": {
 			"type": "string",
-			"metadata": "Sas token to storage account containing linked ARM templates"
+			"metadata": "Token de SAS para la cuenta de almacenamiento que contiene las plantillas de ARM vinculadas"
 		}
 	},
 	"variables": {
@@ -95,7 +95,7 @@
 		{
 			"name": "dfopendatanq_ArmTemplate_0",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
+			"apiVersion": "2024-03-01",
 			"properties": {
 				"mode": "incremental",
 				"templateLink": {
@@ -155,7 +155,7 @@
 		{
 			"name": "dfopendatanq_ArmTemplate_1",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
+			"apiVersion": "2024-03-01",
 			"properties": {
 				"mode": "incremental",
 				"templateLink": {
@@ -187,7 +187,7 @@
 		{
 			"name": "dfopendatanq_ArmTemplate_2",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
+			"apiVersion": "2024-03-01",
 			"properties": {
 				"mode": "incremental",
 				"templateLink": {
@@ -207,7 +207,7 @@
 		{
 			"name": "dfopendatanq_ArmTemplate_3",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
+			"apiVersion": "2024-03-01",
 			"properties": {
 				"mode": "incremental",
 				"templateLink": {
@@ -227,7 +227,7 @@
 		{
 			"name": "dfopendatanq_ArmTemplate_4",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2018-02-01",
+			"apiVersion": "2024-03-01",
 			"properties": {
 				"mode": "incremental",
 				"templateLink": {

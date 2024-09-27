@@ -4,20 +4,20 @@
 	"parameters": {
 		"factoryName": {
 			"type": "string",
-			"metadata": "Data Factory name",
+			"metadata": "Nombre de instancia de Data Factory",
 			"defaultValue": "dfopendatanq"
 		},
 		"Odbc1_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'Odbc1'"
+			"metadata": "Cadena protegida para \"connectionString\"de \"Odbc1\""
 		},
 		"Odbc1_password": {
 			"type": "secureString",
-			"metadata": "Secure string for 'password' of 'Odbc1'"
+			"metadata": "Cadena protegida para \"password\"de \"Odbc1\""
 		},
 		"geoloc_desarrollo_connectionString": {
 			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'geoloc_desarrollo'"
+			"metadata": "Cadena protegida para \"connectionString\"de \"geoloc_desarrollo\""
 		},
 		"Odbc1_properties_typeProperties_userName": {
 			"type": "string",

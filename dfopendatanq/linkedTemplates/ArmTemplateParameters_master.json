@@ -57,7 +57,7 @@
 			"value": "@{linkedService().url_datos_aemet}"
 		},
 		"storage_avron_properties_typeProperties_url": {
-			"value": "https://opendatanq.dfs.core.windows.net/"
+			"value": "https://nvqltopendatanqdes.dfs.core.windows.net/"
 		},
 		"containerUri": {
 			"value": ""
