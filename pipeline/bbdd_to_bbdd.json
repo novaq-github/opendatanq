@@ -1,0 +1,128 @@
+{
+	"name": "bbdd_to_bbdd",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "insert",
+						"sqlWriterUseTableLock": true,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"enableSkipIncompatibleRow": true,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "AzureBlobStorage1",
+								"type": "LinkedServiceReference"
+							}
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": {
+								"value": "@pipeline().parameters.esquema_origen",
+								"type": "Expression"
+							},
+							"tabla": {
+								"value": "@pipeline().parameters.tabla_origen",
+								"type": "Expression"
+							},
+							"bbdd": {
+								"value": "@pipeline().parameters.bbdd_origen",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "farma",
+						"type": "DatasetReference",
+						"parameters": {
+							"esquema": {
+								"value": "@pipeline().parameters.esquema_destino",
+								"type": "Expression"
+							},
+							"tabla": {
+								"value": "@pipeline().parameters.tabla_destino",
+								"type": "Expression"
+							},
+							"bbdd": {
+								"value": "@pipeline().parameters.bbdd_destino",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"esquema_origen": {
+				"type": "string",
+				"defaultValue": "staging"
+			},
+			"tabla_origen": {
+				"type": "string",
+				"defaultValue": "zonas_influencia"
+			},
+			"bbdd_origen": {
+				"type": "string",
+				"defaultValue": "farma"
+			},
+			"esquema_destino": {
+				"type": "string",
+				"defaultValue": "staging"
+			},
+			"tabla_destino": {
+				"type": "string",
+				"defaultValue": "zonas_influencia"
+			},
+			"bbdd_destino": {
+				"type": "string",
+				"defaultValue": "farma"
+			}
+		},
+		"folder": {
+			"name": "2 DL to STG"
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-01-31T13:32:35Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
