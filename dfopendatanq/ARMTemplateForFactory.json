@@ -4,60 +4,68 @@
 	"parameters": {
 		"factoryName": {
 			"type": "string",
-			"metadata": "Nombre de instancia de Data Factory",
+			"metadata": "Data Factory name",
 			"defaultValue": "dfopendatanq"
 		},
 		"AFAemet_functionKey": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"functionKey\"de \"AFAemet\""
+			"metadata": "Secure string for 'functionKey' of 'AFAemet'"
 		},
 		"APK2DB_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"APK2DB\""
+			"metadata": "Secure string for 'connectionString' of 'APK2DB'"
 		},
 		"AzureBlobStorage1_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"AzureBlobStorage1\""
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
 		},
 		"AzureDataLakeStorage1_accountKey": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"accountKey\"de \"AzureDataLakeStorage1\""
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+		},
+		"AzureDatabricks1_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricks1'"
+		},
+		"AzureDatabricksDeltaLake1_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake1'"
 		},
 		"DWH_open_data_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"DWH_open_data\""
+			"metadata": "Secure string for 'connectionString' of 'DWH_open_data'"
 		},
 		"Odbc1_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"Odbc1\""
+			"metadata": "Secure string for 'connectionString' of 'Odbc1'"
 		},
 		"Odbc1_password": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"password\"de \"Odbc1\""
+			"metadata": "Secure string for 'password' of 'Odbc1'"
 		},
 		"backupfarmades_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"backupfarmades\""
+			"metadata": "Secure string for 'connectionString' of 'backupfarmades'"
 		},
 		"farma_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"farma\""
+			"metadata": "Secure string for 'connectionString' of 'farma'"
 		},
 		"geoloc_desarrollo_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"geoloc_desarrollo\""
+			"metadata": "Secure string for 'connectionString' of 'geoloc_desarrollo'"
 		},
 		"nvqltalmactempfarmades_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"nvqltalmactempfarmades\""
+			"metadata": "Secure string for 'connectionString' of 'nvqltalmactempfarmades'"
 		},
 		"pefformance_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"pefformance\""
+			"metadata": "Secure string for 'connectionString' of 'pefformance'"
 		},
 		"storage_avron_accountKey": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"accountKey\"de \"storage_avron\""
+			"metadata": "Secure string for 'accountKey' of 'storage_avron'"
 		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {
 			"type": "string",
@@ -66,6 +74,10 @@
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://opendatanq.dfs.core.windows.net/"
+		},
+		"AzureDatabricks1_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0625-073029-ghho04up"
 		},
 		"Odbc1_properties_typeProperties_userName": {
 			"type": "string",
@@ -9884,6 +9896,133 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/bbdd_to_bbdd')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla_destino}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema_destino}.@{pipeline().parameters.tabla_destino};\n\tEND",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": true,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema_origen",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla_origen",
+										"type": "Expression"
+									},
+									"bbdd": {
+										"value": "@pipeline().parameters.bbdd_origen",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema_destino",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla_destino",
+										"type": "Expression"
+									},
+									"bbdd": {
+										"value": "@pipeline().parameters.bbdd_destino",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"esquema_origen": {
+						"type": "string",
+						"defaultValue": "reporting_kpis"
+					},
+					"tabla_origen": {
+						"type": "string",
+						"defaultValue": "agregada_kpi_anualizados"
+					},
+					"bbdd_origen": {
+						"type": "string",
+						"defaultValue": "farma"
+					},
+					"esquema_destino": {
+						"type": "string",
+						"defaultValue": "reporting_kpis"
+					},
+					"tabla_destino": {
+						"type": "string",
+						"defaultValue": "agregada_kpi_anualizados"
+					},
+					"bbdd_destino": {
+						"type": "string",
+						"defaultValue": "performancehf"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-01-31T13:32:35Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/farma')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/bbdd_to_data_lake_parquet')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -9988,15 +10127,15 @@
 					},
 					"directorio": {
 						"type": "string",
-						"defaultValue": "direcciones/zonas_influencia"
+						"defaultValue": " performance / backup"
 					},
 					"esquema": {
 						"type": "string",
-						"defaultValue": "staging"
+						"defaultValue": "reporting_kpis"
 					},
 					"tabla": {
 						"type": "string",
-						"defaultValue": "zonas_influencia"
+						"defaultValue": "agregada_kpi_anualizados"
 					},
 					"bbdd": {
 						"type": "string",
@@ -12671,7 +12810,6 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "maestro_farmacia",
 						"folderPath": {
 							"value": "@dataset().directorio",
 							"type": "Expression"
@@ -12947,6 +13085,42 @@
 					"accountKey": {
 						"type": "SecureString",
 						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricks1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-4328832190040648.8.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricks1_accessToken')]"
+					},
+					"existingClusterId": "[parameters('AzureDatabricks1_properties_typeProperties_existingClusterId')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricksDeltaLake1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricksDeltaLake",
+				"typeProperties": {
+					"domain": "https://adb-4328832190040648.8.azuredatabricks.net",
+					"clusterId": "0625-073029-ghho04up",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricksDeltaLake1_accessToken')]"
 					}
 				}
 			},
@@ -13412,6 +13586,16 @@
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/integrationRuntimelocal')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntimelocal2')]",
 			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
 			"apiVersion": "2018-06-01",
 			"properties": {

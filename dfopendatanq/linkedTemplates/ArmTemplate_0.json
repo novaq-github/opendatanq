@@ -4,48 +4,56 @@
 	"parameters": {
 		"factoryName": {
 			"type": "string",
-			"metadata": "Nombre de instancia de Data Factory",
+			"metadata": "Data Factory name",
 			"defaultValue": "dfopendatanq"
 		},
 		"AFAemet_functionKey": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"functionKey\"de \"AFAemet\""
+			"metadata": "Secure string for 'functionKey' of 'AFAemet'"
 		},
 		"APK2DB_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"APK2DB\""
+			"metadata": "Secure string for 'connectionString' of 'APK2DB'"
 		},
 		"AzureBlobStorage1_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"AzureBlobStorage1\""
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
 		},
 		"AzureDataLakeStorage1_accountKey": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"accountKey\"de \"AzureDataLakeStorage1\""
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+		},
+		"AzureDatabricks1_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricks1'"
+		},
+		"AzureDatabricksDeltaLake1_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake1'"
 		},
 		"DWH_open_data_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"DWH_open_data\""
+			"metadata": "Secure string for 'connectionString' of 'DWH_open_data'"
 		},
 		"backupfarmades_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"backupfarmades\""
+			"metadata": "Secure string for 'connectionString' of 'backupfarmades'"
 		},
 		"farma_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"farma\""
+			"metadata": "Secure string for 'connectionString' of 'farma'"
 		},
 		"nvqltalmactempfarmades_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"nvqltalmactempfarmades\""
+			"metadata": "Secure string for 'connectionString' of 'nvqltalmactempfarmades'"
 		},
 		"pefformance_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"pefformance\""
+			"metadata": "Secure string for 'connectionString' of 'pefformance'"
 		},
 		"storage_avron_accountKey": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"accountKey\"de \"storage_avron\""
+			"metadata": "Secure string for 'accountKey' of 'storage_avron'"
 		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {
 			"type": "string",
@@ -54,6 +62,10 @@
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://opendatanq.dfs.core.windows.net/"
+		},
+		"AzureDatabricks1_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0625-073029-ghho04up"
 		},
 		"scr_aemet_properties_typeProperties_url": {
 			"type": "string",
@@ -124,6 +136,42 @@
 					"accountKey": {
 						"type": "SecureString",
 						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricks1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-4328832190040648.8.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricks1_accessToken')]"
+					},
+					"existingClusterId": "[parameters('AzureDatabricks1_properties_typeProperties_existingClusterId')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricksDeltaLake1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricksDeltaLake",
+				"typeProperties": {
+					"domain": "https://adb-4328832190040648.8.azuredatabricks.net",
+					"clusterId": "0625-073029-ghho04up",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricksDeltaLake1_accessToken')]"
 					}
 				}
 			},
@@ -297,6 +345,16 @@
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/integrationRuntimelocal')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntimelocal2')]",
 			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -498,156 +556,6 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2023-10-18T12:18:50Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/farma')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/99 borrar duplicados')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "borrar duplicados",
-						"type": "Script",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"linkedServiceName": {
-							"referenceName": "farma",
-							"type": "LinkedServiceReference"
-						},
-						"typeProperties": {
-							"scripts": [
-								{
-									"type": "Query",
-									"text": {
-										"value": "WITH CTE AS (\n    SELECT *,\n           ROW_NUMBER() OVER(PARTITION BY {pipeline().parameters.campos} ORDER BY (SELECT NULL)) AS rn\n    FROM {pipeline().parameters.tabla}\n)\nDELETE FROM CTE WHERE rn > 1;",
-										"type": "Expression"
-									}
-								}
-							],
-							"scriptBlockExecutionTimeout": "02:00:00"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"tabla": {
-						"type": "string"
-					},
-					"campos": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "99 Procesos puntuales"
-				},
-				"annotations": [],
-				"lastPublishTime": "2023-10-15T11:28:39Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/farma')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Prediccion')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Azure Function1",
-						"type": "AzureFunctionActivity",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"functionName": "predicciones",
-							"headers": {
-								"name": "municipios"
-							},
-							"method": "GET"
-						},
-						"linkedServiceName": {
-							"referenceName": "AFAemet",
-							"type": "LinkedServiceReference"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "1 Source to Data_Lake"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-04-10T11:21:36Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AFAemet')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/calculo popularidad satisfaccion')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "carga_calculo_popularidad_satisfaccion",
-						"type": "Script",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"linkedServiceName": {
-							"referenceName": "farma",
-							"type": "LinkedServiceReference",
-							"parameters": {
-								"bbdd": "farma"
-							}
-						},
-						"typeProperties": {
-							"scripts": [
-								{
-									"type": "Query",
-									"text": "\nWITH ResenasPorSemana AS (\n    SELECT \n        l.place_id,\n        DATEADD(day, -DATEPART(weekday, TRY_CONVERT(date, l.date_review)), TRY_CONVERT(date, l.date_review)) AS semana,\n        COUNT(*) AS num_resenas_semana,\n        count(review) as num_comentarios,\n        count(response) as num_respuestas,        \n        SUM(CASE s.rating WHEN '5.0' THEN 1 ELSE 0 END) AS num_resenas_5,\n        SUM(CASE s.rating WHEN '4.0' THEN 1 ELSE 0 END) AS num_resenas_4,\n        SUM(CASE s.rating WHEN '3.0' THEN 1 ELSE 0 END) AS num_resenas_3,\n        SUM(CASE s.rating WHEN '2.0' THEN 1 ELSE 0 END) AS num_resenas_2,\n        SUM(CASE s.rating WHEN '1.0' THEN 1 ELSE 0 END) AS num_resenas_1\n    FROM MAESTROS.LINK_DATOS_PLACE_REVIEWS l \n    JOIN MAESTROS.SAT_DATOS_PLACE_REVIEW_TEXTOS s \n        ON s.hash_key_review_place = l.hash_key_review_place \n        AND s.ACTIVE_RECORD_INDICATOR = 'S'\n    GROUP BY \n        l.place_id,\n        DATEADD(day, -DATEPART(weekday, TRY_CONVERT(date, l.date_review)), TRY_CONVERT(date, l.date_review) ) \n),\nRankedResenasPorSemana AS (\n    SELECT *,\n        ROW_NUMBER() OVER(PARTITION BY place_id ORDER BY num_resenas_semana DESC) AS Rank\n    FROM ResenasPorSemana\n), ResenasPorPlace as (\nSELECT\n    r.place_id,    \n    MIN(r.semana) AS desde,\n    MAX(r.semana) AS hasta,\n    TRY_CONVERT (float, DATEDIFF(week, MIN(r.semana), MAX(r.semana)) ) AS semanas_historia,\n    TRY_CONVERT (float, COUNT(DISTINCT r.semana) ) AS num_semanas_con_resenas,\n    TRY_CONVERT(FLOAT,SUM(CASE WHEN r.num_resenas_5 > 0 THEN 1 ELSE 0 END)  ) AS num_semanas_con_resenas_5,\n    TRY_CONVERT(FLOAT,SUM(CASE WHEN r.num_resenas_1 > 0 THEN 1 ELSE 0 END) ) AS num_semanas_con_resenas_1,\n    TRY_CONVERT(FLOAT,SUM(r.num_resenas_semana) ) AS num_resenas,\n    TRY_CONVERT(FLOAT,SUM(r.num_comentarios)) AS comentarios,\n    TRY_CONVERT(FLOAT, SUM(r.num_respuestas) ) AS num_respuestas,\n    SUM(TRY_CONVERT (float,r.num_resenas_5) ) AS num_resenas_5,\n    SUM(TRY_CONVERT (float,r.num_resenas_4)) AS num_resenas_4,\n    SUM(TRY_CONVERT (float,r.num_resenas_3)) AS num_resenas_3,\n    SUM(TRY_CONVERT (float,r.num_resenas_2)) AS num_resenas_2,\n    SUM(TRY_CONVERT (float,r.num_resenas_1)) AS num_resenas_1,\n    TRY_CONVERT (float, SUM(CASE WHEN r.Rank = 1 THEN r.num_resenas_semana ELSE 0 END)) AS TotalResenasEnSemanaMasResenas,\n    TRY_CONVERT (float, SUM(CASE WHEN r.Rank = 1 THEN r.num_resenas_5 ELSE 0 END) ) AS Resenas_5_EnSemanaMasResenas,\n    TRY_CONVERT (float, SUM(CASE WHEN r.Rank = 1 THEN r.num_resenas_1 ELSE 0 END) )  AS Resenas_1_EnSemanaMasResenas,\n    -- Calcular el número de semanas con reseñas en el último año\n    TRY_CONVERT(float, SUM(CASE \n        WHEN DATEDIFF(month, r.semana, GETDATE()) < 12 THEN 1\n        ELSE 0 \n    END)) AS num_semanas_con_resenas_ultimo_12_meses,\n    TRY_CONVERT(FLOAT,SUM(CASE \n        WHEN DATEDIFF(month, r.semana, GETDATE()) < 12 THEN r.num_resenas_semana\n        ELSE 0 \n    END)) AS num_resenas_ultimo_12_meses\nFROM RankedResenasPorSemana r\nGROUP BY r.place_id )\nSELECT \n\tplace_id,\n    desde,\n    hasta, \n    semanas_historia,\n    num_semanas_con_resenas semanas_con_resenas,\n    num_resenas, \n    case \n    when semanas_historia > 52 then num_semanas_con_resenas_ultimo_12_meses/52 \n    when semanas_historia > 0 then num_semanas_con_resenas_ultimo_12_meses/semanas_historia \n    else 0 end  ratio_semanas_con_resenas_ult_12m,\n    case when num_resenas >0 then num_resenas_ultimo_12_meses/num_resenas else 0 end  ratio_resenas_ult_12m,\n    case when num_resenas >0 then comentarios/num_resenas else 0 end  ratio_resenas_comentadas,\n    case when comentarios >0 then num_respuestas/comentarios else 0 end  ratio_resenas_respondidas,\n    TotalResenasEnSemanaMasResenas max_rese_semana,\n    case when num_resenas >9 then (Resenas_5_EnSemanaMasResenas+ Resenas_1_EnSemanaMasResenas) /num_resenas else 0 end ratio_manipulacion,\n    case when num_resenas >9 and (Resenas_5_EnSemanaMasResenas+ Resenas_1_EnSemanaMasResenas) >0 then Resenas_5_EnSemanaMasResenas/(Resenas_5_EnSemanaMasResenas+ Resenas_1_EnSemanaMasResenas) else 0 end ratio_manipulacion_positiva,\n    case when num_resenas >9 and (Resenas_5_EnSemanaMasResenas+ Resenas_1_EnSemanaMasResenas) >0 then Resenas_1_EnSemanaMasResenas/(Resenas_5_EnSemanaMasResenas+ Resenas_1_EnSemanaMasResenas) else 0 end ratio_manipulacion_negativa,\n    num_resenas_5*5+num_resenas_4*4+num_resenas_3*3+num_resenas_2*2+num_resenas_1 popularidad_teorica,\n    (num_resenas_5-Resenas_5_EnSemanaMasResenas) *5+num_resenas_4*4+num_resenas_3*3+num_resenas_2*2+(num_resenas_1-Resenas_1_EnSemanaMasResenas) popularidad_real,\n    case when num_resenas>0 then (num_resenas_5*5+num_resenas_4*4+num_resenas_3*3+num_resenas_2*2+num_resenas_1)/num_resenas else 0 end ranking_teorico,\n    case \n\t    when num_resenas>9 then ((num_resenas_5-Resenas_5_EnSemanaMasResenas) *5+num_resenas_4*4+num_resenas_3*3+num_resenas_2*2+(num_resenas_1-Resenas_1_EnSemanaMasResenas))/num_resenas\n\t    when  num_resenas>0 then (num_resenas_5*5+num_resenas_4*4+num_resenas_3*3+num_resenas_2*2+num_resenas_1)/num_resenas\n\t    else 0 end ranking_real,    \n\t(num_resenas_5-Resenas_5_EnSemanaMasResenas) *5+num_resenas_4*4+num_resenas_3*3-num_resenas_2*2-(num_resenas_1-Resenas_1_EnSemanaMasResenas)*5 as satisfaccion_clientes_real\n\tinto calculos.datos_place_manipulacion_review_new\n\tFROM ResenasPorPlace;\ndrop table calculos.datos_place_manipulacion_review;\n\n\nEXEC farma.sys.sp_rename N'farma.calculos.datos_place_manipulacion_review_new', N'datos_place_manipulacion_review', 'OBJECT';\n\n\n\nSELECT place_id,\n    DATEADD(day, -DATEPART(weekday, TRY_CONVERT(date, date_review)), TRY_CONVERT(date, date_review)) AS semana , count(*) num_resenas_semana,\n    sum(case s.rating when '5.0' then 1 else 0 end) num_resenas_5,\n    sum(case s.rating when '1.0' then 1 else 0 end) num_resenas_1    \ninto calculos.datos_evolucion_resenas_new\n    FROM\n    MAESTROS.LINK_DATOS_PLACE_REVIEWS l \njoin MAESTROS.SAT_DATOS_PLACE_REVIEW_TEXTOS s on s.hash_key_review_place = l.hash_key_review_place and s.ACTIVE_RECORD_INDICATOR ='S' \n   group by DATEADD(day, -DATEPART(weekday, TRY_CONVERT(date, date_review)), TRY_CONVERT(date, date_review)), place_id\n\n \n\n  \ndrop table calculos.datos_evolucion_resenas;\n\n EXEC farma.sys.sp_rename N'farma.calculos.datos_evolucion_resenas_new', N'datos_evolucion_resenas', 'OBJECT';\n   \n\n"
-								}
-							],
-							"scriptBlockExecutionTimeout": "02:00:00"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "4 DWH- DM"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-03-17T19:34:22Z"
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/farma')]"

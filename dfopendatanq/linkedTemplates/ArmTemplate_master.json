@@ -4,60 +4,68 @@
 	"parameters": {
 		"factoryName": {
 			"type": "string",
-			"metadata": "Nombre de instancia de Data Factory",
+			"metadata": "Data Factory name",
 			"defaultValue": "dfopendatanq"
 		},
 		"AFAemet_functionKey": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"functionKey\"de \"AFAemet\""
+			"metadata": "Secure string for 'functionKey' of 'AFAemet'"
 		},
 		"APK2DB_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"APK2DB\""
+			"metadata": "Secure string for 'connectionString' of 'APK2DB'"
 		},
 		"AzureBlobStorage1_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"AzureBlobStorage1\""
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
 		},
 		"AzureDataLakeStorage1_accountKey": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"accountKey\"de \"AzureDataLakeStorage1\""
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+		},
+		"AzureDatabricks1_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricks1'"
+		},
+		"AzureDatabricksDeltaLake1_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake1'"
 		},
 		"DWH_open_data_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"DWH_open_data\""
+			"metadata": "Secure string for 'connectionString' of 'DWH_open_data'"
 		},
 		"Odbc1_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"Odbc1\""
+			"metadata": "Secure string for 'connectionString' of 'Odbc1'"
 		},
 		"Odbc1_password": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"password\"de \"Odbc1\""
+			"metadata": "Secure string for 'password' of 'Odbc1'"
 		},
 		"backupfarmades_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"backupfarmades\""
+			"metadata": "Secure string for 'connectionString' of 'backupfarmades'"
 		},
 		"farma_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"farma\""
+			"metadata": "Secure string for 'connectionString' of 'farma'"
 		},
 		"geoloc_desarrollo_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"geoloc_desarrollo\""
+			"metadata": "Secure string for 'connectionString' of 'geoloc_desarrollo'"
 		},
 		"nvqltalmactempfarmades_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"nvqltalmactempfarmades\""
+			"metadata": "Secure string for 'connectionString' of 'nvqltalmactempfarmades'"
 		},
 		"pefformance_connectionString": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"connectionString\"de \"pefformance\""
+			"metadata": "Secure string for 'connectionString' of 'pefformance'"
 		},
 		"storage_avron_accountKey": {
 			"type": "secureString",
-			"metadata": "Cadena protegida para \"accountKey\"de \"storage_avron\""
+			"metadata": "Secure string for 'accountKey' of 'storage_avron'"
 		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {
 			"type": "string",
@@ -66,6 +74,10 @@
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://opendatanq.dfs.core.windows.net/"
+		},
+		"AzureDatabricks1_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "0625-073029-ghho04up"
 		},
 		"Odbc1_properties_typeProperties_userName": {
 			"type": "string",
@@ -81,11 +93,11 @@
 		},
 		"containerUri": {
 			"type": "string",
-			"metadata": "URI de la cuenta de almacenamiento que contiene las plantillas de ARM vinculadas."
+			"metadata": "URI to storage account containing linked ARM templates"
 		},
 		"containerSasToken": {
 			"type": "string",
-			"metadata": "Token de SAS para la cuenta de almacenamiento que contiene las plantillas de ARM vinculadas"
+			"metadata": "Sas token to storage account containing linked ARM templates"
 		}
 	},
 	"variables": {
@@ -118,6 +130,12 @@
 					"AzureDataLakeStorage1_accountKey": {
 						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
 					},
+					"AzureDatabricks1_accessToken": {
+						"value": "[parameters('AzureDatabricks1_accessToken')]"
+					},
+					"AzureDatabricksDeltaLake1_accessToken": {
+						"value": "[parameters('AzureDatabricksDeltaLake1_accessToken')]"
+					},
 					"DWH_open_data_connectionString": {
 						"value": "[parameters('DWH_open_data_connectionString')]"
 					},
@@ -142,6 +160,9 @@
 					"AzureDataLakeStorage1_properties_typeProperties_url": {
 						"value": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]"
 					},
+					"AzureDatabricks1_properties_typeProperties_existingClusterId": {
+						"value": "[parameters('AzureDatabricks1_properties_typeProperties_existingClusterId')]"
+					},
 					"scr_aemet_properties_typeProperties_url": {
 						"value": "[parameters('scr_aemet_properties_typeProperties_url')]"
 					},
@@ -165,18 +186,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"Odbc1_connectionString": {
-						"value": "[parameters('Odbc1_connectionString')]"
-					},
-					"Odbc1_password": {
-						"value": "[parameters('Odbc1_password')]"
-					},
-					"geoloc_desarrollo_connectionString": {
-						"value": "[parameters('geoloc_desarrollo_connectionString')]"
-					},
-					"Odbc1_properties_typeProperties_userName": {
-						"value": "[parameters('Odbc1_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -197,6 +206,18 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"Odbc1_connectionString": {
+						"value": "[parameters('Odbc1_connectionString')]"
+					},
+					"Odbc1_password": {
+						"value": "[parameters('Odbc1_password')]"
+					},
+					"geoloc_desarrollo_connectionString": {
+						"value": "[parameters('geoloc_desarrollo_connectionString')]"
+					},
+					"Odbc1_properties_typeProperties_userName": {
+						"value": "[parameters('Odbc1_properties_typeProperties_userName')]"
 					}
 				}
 			},
@@ -242,6 +263,26 @@
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'dfopendatanq_ArmTemplate_3')]"
+			]
+		},
+		{
+			"name": "dfopendatanq_ArmTemplate_5",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'dfopendatanq_ArmTemplate_4')]"
 			]
 		}
 	]

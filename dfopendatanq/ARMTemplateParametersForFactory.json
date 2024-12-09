@@ -17,6 +17,12 @@
 		"AzureDataLakeStorage1_accountKey": {
 			"value": ""
 		},
+		"AzureDatabricks1_accessToken": {
+			"value": ""
+		},
+		"AzureDatabricksDeltaLake1_accessToken": {
+			"value": ""
+		},
 		"DWH_open_data_connectionString": {
 			"value": ""
 		},
@@ -49,6 +55,9 @@
 		},
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"value": "https://opendatanq.dfs.core.windows.net/"
+		},
+		"AzureDatabricks1_properties_typeProperties_existingClusterId": {
+			"value": "0625-073029-ghho04up"
 		},
 		"Odbc1_properties_typeProperties_userName": {
 			"value": "nquser"
