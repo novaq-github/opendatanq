@@ -22,8 +22,13 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
+						"preCopyScript": {
+							"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla_destino}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema_destino}.@{pipeline().parameters.tabla_destino};\n\tEND",
+							"type": "Expression"
+						},
 						"writeBehavior": "insert",
 						"sqlWriterUseTableLock": true,
+						"tableOption": "autoCreate",
 						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
@@ -95,11 +100,11 @@
 		"parameters": {
 			"esquema_origen": {
 				"type": "string",
-				"defaultValue": "staging"
+				"defaultValue": "reporting_kpis"
 			},
 			"tabla_origen": {
 				"type": "string",
-				"defaultValue": "zonas_influencia"
+				"defaultValue": "agregada_kpi_anualizados"
 			},
 			"bbdd_origen": {
 				"type": "string",
@@ -107,15 +112,15 @@
 			},
 			"esquema_destino": {
 				"type": "string",
-				"defaultValue": "staging"
+				"defaultValue": "reporting_kpis"
 			},
 			"tabla_destino": {
 				"type": "string",
-				"defaultValue": "zonas_influencia"
+				"defaultValue": "agregada_kpi_anualizados"
 			},
 			"bbdd_destino": {
 				"type": "string",
-				"defaultValue": "farma"
+				"defaultValue": "performancehf"
 			}
 		},
 		"folder": {
