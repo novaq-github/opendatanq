@@ -1,0 +1,7 @@
+{
+	"name": "integrationRuntime-itfarma",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "runtime alojado en el servidor de it farma para hacer al actualizacion de datos ern Farmatic"
+	}
+}
