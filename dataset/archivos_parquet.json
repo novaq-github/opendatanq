@@ -20,7 +20,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "maestro_farmacia",
 				"folderPath": {
 					"value": "@dataset().directorio",
 					"type": "Expression"

@@ -98,15 +98,15 @@
 			},
 			"directorio": {
 				"type": "string",
-				"defaultValue": "direcciones/zonas_influencia"
+				"defaultValue": " performance / backup"
 			},
 			"esquema": {
 				"type": "string",
-				"defaultValue": "staging"
+				"defaultValue": "reporting_kpis"
 			},
 			"tabla": {
 				"type": "string",
-				"defaultValue": "zonas_influencia"
+				"defaultValue": "agregada_kpi_anualizados"
 			},
 			"bbdd": {
 				"type": "string",
