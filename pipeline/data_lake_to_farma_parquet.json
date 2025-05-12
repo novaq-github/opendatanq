@@ -99,7 +99,8 @@
 							"tabla": {
 								"value": "@pipeline().parameters.tabla",
 								"type": "Expression"
-							}
+							},
+							"bbdd": "farma"
 						}
 					}
 				]
