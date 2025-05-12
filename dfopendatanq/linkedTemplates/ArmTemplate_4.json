@@ -13,6 +13,299 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_csv_carpeta_comas')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DTS",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "archivo_texto_Data_Lake_coma",
+								"type": "DatasetReference",
+								"parameters": {
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									},
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"fichero": "1"
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									},
+									"bbdd": {
+										"value": "@pipeline().parameters.bbdd",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "salud"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "direcciones/zonas_influencia"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "zonas_influencia"
+					},
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-01-26T11:11:19Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_parquet_carpeta')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ParquetSource",
+								"additionalColumns": [
+									{
+										"name": "LOAD_DTS",
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										}
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*.parquet",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "ParquetReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
+									"type": "Expression"
+								},
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"enableSkipIncompatibleRow": true,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "AzureBlobStorage1",
+										"type": "LinkedServiceReference"
+									}
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "archivos_parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"contenedor": {
+										"value": "@pipeline().parameters.contenedor",
+										"type": "Expression"
+									},
+									"directorio": {
+										"value": "@pipeline().parameters.directorio",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "farma",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": {
+										"value": "@pipeline().parameters.esquema",
+										"type": "Expression"
+									},
+									"tabla": {
+										"value": "@pipeline().parameters.tabla",
+										"type": "Expression"
+									},
+									"bbdd": {
+										"value": "@pipeline().parameters.bbdd",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"contenedor": {
+						"type": "string",
+						"defaultValue": "salud"
+					},
+					"directorio": {
+						"type": "string",
+						"defaultValue": "direcciones/zonas_influencia"
+					},
+					"esquema": {
+						"type": "string",
+						"defaultValue": "staging"
+					},
+					"tabla": {
+						"type": "string",
+						"defaultValue": "zonas_influencia"
+					},
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-02-12T16:05:09Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/data_lake_to_farma')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -406,7 +699,8 @@
 									"tabla": {
 										"value": "@pipeline().parameters.tabla",
 										"type": "Expression"
-									}
+									},
+									"bbdd": "farma"
 								}
 							}
 						]
@@ -1849,83 +2143,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/5 AEMET OBSERVACION_DIARIA')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PREDICCION_AEMET')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "5 AEMET PREDICCION_DIARIA",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2023-02-20T11:42:00",
-						"timeZone": "Romance Standard Time",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								0
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/5 AEMET PREDICCION_DIARIA')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/todas las noches a las 2')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "actualiza zonas_influencias",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2024-03-17T17:38:00",
-						"endTime": "2024-03-23T17:38:00",
-						"timeZone": "Romance Standard Time",
-						"schedule": {
-							"minutes": [
-								0
-							],
-							"hours": [
-								2
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/actualiza zonas_influencias')]"
 			]
 		}
 	]

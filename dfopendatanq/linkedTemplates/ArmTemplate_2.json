@@ -29,6 +29,86 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/farma')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "farma",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"bbdd": {
+							"value": "@dataset().bbdd",
+							"type": "Expression"
+						}
+					}
+				},
+				"parameters": {
+					"esquema": {
+						"type": "string"
+					},
+					"tabla": {
+						"type": "string"
+					},
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().esquema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tabla",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/performance')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "pefformance",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"esquema": {
+						"type": "string"
+					},
+					"tabla": {
+						"type": "string"
+					},
+					"bbdd": {
+						"type": "string",
+						"defaultValue": "farma"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": {
+						"value": "@dataset().esquema",
+						"type": "Expression"
+					},
+					"table": {
+						"value": "@dataset().tabla",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/scr_aemet')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -1594,7 +1674,9 @@
 				"annotations": [],
 				"lastPublishTime": "2023-10-13T17:47:38Z"
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/farma')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/2 Carga datos pois')]",
@@ -1686,7 +1768,9 @@
 				"annotations": [],
 				"lastPublishTime": "2024-03-17T19:34:22Z"
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/farma')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/2 INE DATOS_ESTADISTICA_ESPERIMENTAL')]",
@@ -2022,7 +2106,9 @@
 				"annotations": [],
 				"lastPublishTime": "2024-02-12T16:05:09Z"
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/farma')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/2 Zonas_influencia FARMAS')]",
@@ -2361,7 +2447,9 @@
 				"annotations": [],
 				"lastPublishTime": "2023-10-24T16:11:49Z"
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/farma')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/2 Zonas_influencia FARMAS_copy1')]",
@@ -2454,161 +2542,9 @@
 				"annotations": [],
 				"lastPublishTime": "2023-11-14T13:59:07Z"
 			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/2 carga catastro_v2')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "copia catastro_agregado_portales",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"wildcardFileName": "*",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "AzureSqlSink",
-								"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'tb_catastro_portales_espejo' AND type = 'U')\nBEGIN\n    \tdrop TABLE STG.tb_catastro_portales_espejo;\n\tEND",
-								"writeBehavior": "insert",
-								"sqlWriterUseTableLock": false,
-								"tableOption": "autoCreate",
-								"disableMetricsCollection": false
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "DelimitedText_comas",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "DWH_open_data",
-								"type": "DatasetReference",
-								"parameters": {
-									"esquema": "STG",
-									"tabla": "tb_catastro_portales_espejo"
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "2 DL to STG"
-				},
-				"annotations": [],
-				"lastPublishTime": "2023-11-14T13:59:07Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/2 copia maestro_farmacias_excel')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "copia maestro_farmacias_excel",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "ExcelSource",
-								"storeSettings": {
-									"type": "AzureFileStorageReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								}
-							},
-							"sink": {
-								"type": "ParquetSink",
-								"storeSettings": {
-									"type": "AzureBlobFSWriteSettings"
-								},
-								"formatSettings": {
-									"type": "ParquetWriteSettings"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "backupfarmades",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "archivos_parquet",
-								"type": "DatasetReference",
-								"parameters": {
-									"contenedor": "salud",
-									"directorio": "maestros/maestros_farmacias"
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "2 DL to STG"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/farma')]"
+			]
 		}
 	]
 }

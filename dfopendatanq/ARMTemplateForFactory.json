@@ -67,13 +67,17 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'storage_avron'"
 		},
+		"AzureDatabricksDeltaLake2_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake2'"
+		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {
 			"type": "string",
 			"defaultValue": "https://afaemet.azurewebsites.net"
 		},
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://opendatanq.dfs.core.windows.net/"
+			"defaultValue": "https://nvqltopendatanqdes.dfs.core.windows.net"
 		},
 		"AzureDatabricks1_properties_typeProperties_existingClusterId": {
 			"type": "string",
@@ -11752,7 +11756,8 @@
 									"tabla": {
 										"value": "@pipeline().parameters.tabla",
 										"type": "Expression"
-									}
+									},
+									"bbdd": "farma"
 								}
 							}
 						]
@@ -13585,6 +13590,17 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntime-itfarma')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "runtime alojado en el servidor de it farma para hacer al actualizacion de datos ern Farmatic",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/integrationRuntimelocal')]",
 			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
 			"apiVersion": "2018-06-01",
@@ -13612,6 +13628,24 @@
 				"type": "SelfHosted",
 				"description": "Integration runtime acceso red interna nvqlt",
 				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDatabricksDeltaLake2')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricksDeltaLake",
+				"typeProperties": {
+					"domain": "https://adb-4328832190040648.8.azuredatabricks.net",
+					"clusterId": "0912-070620-a2e50shw",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDatabricksDeltaLake2_accessToken')]"
+					}
+				}
 			},
 			"dependsOn": []
 		}

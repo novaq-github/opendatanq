@@ -13,6 +13,189 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/1 AEMET PREDICCION_DIARIA')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Descarga predicciones diarias",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"functionName": "prediccionesAemet",
+							"headers": {},
+							"method": "GET"
+						},
+						"linkedServiceName": {
+							"referenceName": "AFAemet",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "1 Source to Data_Lake"
+				},
+				"annotations": [],
+				"lastPublishTime": "2024-04-10T11:21:36Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/3 datos farms a DWH')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DV DIRECCIONES",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "INSERT INTO MAESTROS.LINK_DIRECCIONES\r\n    (hash_direccion, hash_codigo_provincia, hash_codigo_municipio, hash_codigo_tipo_via, [Código Postal], [Nombre de la vía], [Número Vía], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_direccion, \r\n    hash_codigo_provincia, \r\n    hash_codigo_municipio, \r\n    hash_codigo_tipo_via, \r\n    [Código Postal], \r\n    [Nombre de la vía], \r\n    [Número Vía], \r\n    LOAD_DTS \r\nFROM \r\n    farma.staging.vista_direcciones_hash d\r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.LINK_DIRECCIONES l WHERE l.hash_direccion = d.hash_direccion);\r\n\r\nINSERT INTO MAESTROS.HUB_TIPO_VIA \r\n    (hash_codigo_tipo_via, [Código Tipo Vía], LOAD_DTS)\r\nSELECT \r\n    d.hash_codigo_tipo_via, \r\n    d.[Código Tipo Vía], \r\n    LOAD_DTS\r\nFROM \r\n    staging.vista_direcciones_hash d\r\nWHERE     NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_VIA htv WHERE htv.hash_codigo_tipo_via = d.hash_codigo_tipo_via)\r\n;\r\n\r\nINSERT INTO MAESTROS.HUB_municipio\r\n    (hash_codigo_municipio, Municipio, [Código Municipio], LOAD_DTS)\r\nSELECT DISTINCT \r\n    d.hash_codigo_municipio, \r\n    d.Municipio, \r\n    d.[Código Municipio], \r\n    d.LOAD_DTS  LOAD_DTS\r\n    FROM \r\n    staging.vista_direcciones_hash d\r\nWHERE  NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_municipio hm WHERE hm.hash_codigo_municipio = d.hash_codigo_municipio)\r\n;\r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.vista_direcciones_hash Stg \r\n       INNER JOIN MAESTROS.SAT_DIRECCIONES Sat\r\n           ON  Sat.hash_direccion      = Stg.hash_direccion\r\n WHERE Sat.hash_diff <> Stg.[hash_diff]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ; \r\n\r\nINSERT INTO MAESTROS.SAT_DIRECCIONES \r\n    (hash_direccion, direccion_normalizada, lat, lng, geocodificador, cp, dq, START_DTS, END_DTS,hash_diff)\r\nSELECT DISTINCT \r\n    d.hash_direccion, \r\n    d.direccion_normalizada, \r\n    d.lat, \r\n    d.lng, \r\n    d.geocodificador, \r\n    d.cp, \r\n    d.dq, \r\n    d.LOAD_DTS START_DTS, \r\n    NULL END_DTS,\r\n    hash_diff\r\n--INTO MAESTROS.SAT_DIRECCIONES\r\n    FROM \r\n    staging.vista_direcciones_hash d    \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.SAT_DIRECCIONES sd WHERE sd.hash_direccion = d.hash_direccion AND sd.hash_diff = d.hash_diff);\r\n      \r\nINSERT INTO MAESTROS.HUB_PROVINCIA \r\n    (hash_codigo_provincia, Provincia, [Código Provincia], LOAD_DTS)\r\nSELECT DISTINCT\r\n    hash_codigo_provincia, \r\n    Provincia, \r\n    [Código Provincia], \r\n    LOAD_DTS\r\n--INTO MAESTROS.HUB_PROVINCIA  \r\nFROM \r\n    farma.staging.vista_direcciones_hash d\r\nWHERE     NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_PROVINCIA l WHERE l.hash_codigo_provincia = d.hash_codigo_provincia)\r\n;\r\n\r\n"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "DV CENTROS",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "DV DIRECCIONES",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "\r\n\r\nINSERT INTO MAESTROS.HUB_CODIGO_CENTRO \r\n    (hash_codigo_centro, [Código de Centro Normalizado REGCESS (CCN)], LOAD_DTS)\r\nSELECT \r\n    DISTINCT hash_codigo_centro, \r\n    [Código de Centro Normalizado REGCESS (CCN)], \r\n    LOAD_DTS\r\n--INTO MAESTROS.HUB_CODIGO_CENTRO \r\n    FROM \r\n    farma.staging.hash_centros_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_CODIGO_CENTRO WHERE hash_codigo_centro = farma.staging.hash_centros_view.hash_codigo_centro);\r\n   \r\n INSERT INTO MAESTROS.HUB_TIPO_CENTRO \r\n    (hash_tipo_centro, [Tipo centro], LOAD_DTS)\r\nSELECT \r\n    DISTINCT hash_tipo_centro, \r\n    [Tipo centro], \r\n    LOAD_DTS\r\n--INTO MAESTROS.HUB_TIPO_CENTRO \r\n    FROM \r\n    farma.staging.hash_centros_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_CENTRO WHERE hash_tipo_centro = farma.staging.hash_centros_view.hash_tipo_centro)\r\n   ;\r\n  \r\n  INSERT INTO MAESTROS.HUB_DEPENDENCIA_FUNCIONAL \r\n    (hash_dependencia_funcional, [Dependencia  Funcional], LOAD_DTS)\r\nSELECT \r\n    DISTINCT hash_dependencia_funcional, \r\n    [Dependencia  Funcional], \r\n    LOAD_DTS\r\n--INTO MAESTROS.HUB_DEPENDENCIA_FUNCIONAL \r\n    FROM \r\n    farma.staging.hash_centros_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_DEPENDENCIA_FUNCIONAL WHERE hash_dependencia_funcional = farma.staging.hash_centros_view.hash_dependencia_funcional);\r\n   \r\n   INSERT INTO MAESTROS.HUB_GRUPO_FUNCIONAL \r\n    (hash_grupo_funcional, [Grupo de dependencia  Funcional], LOAD_DTS)\r\nSELECT \r\n    DISTINCT hash_grupo_funcional, \r\n    [Grupo de dependencia  Funcional], \r\n    LOAD_DTS\r\n--INTO MAESTROS.HUB_GRUPO_FUNCIONAL\r\n    FROM \r\n    farma.staging.hash_centros_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_GRUPO_FUNCIONAL WHERE hash_grupo_funcional = farma.staging.hash_centros_view.hash_grupo_funcional);\r\n   \r\n   INSERT INTO MAESTROS.HUB_TIPO_AUTORIZACION \r\n    (hash_tipo_autorizacion, [Tipo de última Autorización], LOAD_DTS)\r\nSELECT \r\n    DISTINCT hash_tipo_autorizacion, \r\n    [Tipo de última Autorización], \r\n    LOAD_DTS\r\n--INTO MAESTROS.HUB_TIPO_AUTORIZACION \r\n    FROM \r\n    farma.staging.hash_centros_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_AUTORIZACION WHERE hash_tipo_autorizacion = farma.staging.hash_centros_view.hash_tipo_autorizacion);\r\n   \r\n\r\n   \r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.hash_centros_view Stg \r\n       INNER JOIN MAESTROS.SAT_CENTRO Sat\r\n           ON  Sat.hash_codigo_centro      = Stg.hash_codigo_centro\r\n WHERE Sat.hash_diff <> Stg.[hash_diff]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ;    \r\n   \r\n   \r\nINSERT INTO MAESTROS.SAT_CENTRO \r\n    (hash_codigo_centro, \r\n    [Nombre Centro], \r\n    [Código Comunidad Autónoma], \r\n    [Correo  Electrónico], \r\n    Fax, \r\n    Teléfono, \r\n    Url, \r\n    [Fecha Autorización  de Funcionamiento], \r\n    [Fecha de última  Autorización],\r\n     START_DTS,\r\n     END_DTS,\r\n     hash_diff)\r\nSELECT \r\n    DISTINCT hash_codigo_centro, \r\n    [Nombre Centro], \r\n    [Código Comunidad Autónoma], \r\n    [Correo  Electrónico], \r\n    Fax, \r\n    Teléfono, \r\n    Url, \r\n    [Fecha Autorización  de Funcionamiento], \r\n    [Fecha de última  Autorización],\r\n    LOAD_DTS  START_DTS,\r\n    NULL  END_DTS,\r\n    hash_diff    \r\n--INTO MAESTROS.SAT_CENTRO \r\n    FROM \r\n    farma.staging.hash_centros_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.SAT_CENTRO WHERE hash_codigo_centro = farma.staging.hash_centros_view.hash_codigo_centro AND hash_diff=hash_centros_view.hash_diff);\r\n   \r\n   \r\n   \r\n   \r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.hash_centros_view Stg \r\n       INNER JOIN MAESTROS.LINK_CENTRO_DIRECCION Sat\r\n           ON  Sat.hash_codigo_centro      = Stg.hash_codigo_centro\r\n WHERE Sat.hash_direccion <> Stg.[hash_direccion]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ;    \r\n \r\n   \r\nINSERT INTO MAESTROS.LINK_CENTRO_DIRECCION \r\n    ( hash_codigo_centro,\r\n     hash_direccion,\r\n     START_DTS,\r\n     END_DTS)   \r\n   SELECT \r\n    DISTINCT hash_codigo_centro, hash_direccion , LOAD_DTS START_DTS, NULL END_DTS\r\n--INTO MAESTROS.LINK_CENTRO_DIRECCION\r\nFROM \r\n    farma.staging.hash_centros_view    \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.LINK_CENTRO_DIRECCION \r\n   \t\t\t\tWHERE hash_codigo_centro = farma.staging.hash_centros_view.hash_codigo_centro AND\r\n   \t\t\t    hash_direccion =farma.staging.hash_centros_view.hash_direccion );\r\n   \r\n   \r\n\r\n\r\n\r\n\r\n  \r\n"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "DV medicos",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "DV CENTROS",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "-- 1. HUB_CODIGO_CENTRO\r\nINSERT INTO MAESTROS.HUB_CODIGO_CENTRO \r\n    (hash_codigo_centro, [Código de Centro Normalizado REGCESS (CCN)], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_codigo_centro, \r\n    [Código de Centro Normalizado REGCESS (CCN)], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_medicos_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_CODIGO_CENTRO WHERE hash_codigo_centro = farma.staging.hash_medicos_view.hash_codigo_centro);\r\n\r\n-- 2. HUB_TIPO_CENTRO\r\nINSERT INTO MAESTROS.HUB_TIPO_CENTRO \r\n    (hash_tipo_centro, [Tipo centro], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_tipo_centro, \r\n    [Tipo centro], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_medicos_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_CENTRO WHERE hash_tipo_centro = farma.staging.hash_medicos_view.hash_tipo_centro);\r\n\r\n-- 3. HUB_DEPENDENCIA_FUNCIONAL\r\nINSERT INTO MAESTROS.HUB_DEPENDENCIA_FUNCIONAL \r\n    (hash_dependencia_funcional, [Dependencia  Funcional], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_dependencia_funcional, \r\n    [Dependencia  Funcional], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_medicos_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_DEPENDENCIA_FUNCIONAL WHERE hash_dependencia_funcional = farma.staging.hash_medicos_view.hash_dependencia_funcional);\r\n\r\n-- 4. HUB_GRUPO_FUNCIONAL\r\nINSERT INTO MAESTROS.HUB_GRUPO_FUNCIONAL \r\n    (hash_grupo_funcional, [Grupo de dependencia  Funcional], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_grupo_funcional, \r\n    [Grupo de dependencia  Funcional], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_medicos_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_GRUPO_FUNCIONAL WHERE hash_grupo_funcional = farma.staging.hash_medicos_view.hash_grupo_funcional);\r\n\r\n-- 5. HUB_TIPO_AUTORIZACION\r\nINSERT INTO MAESTROS.HUB_TIPO_AUTORIZACION \r\n    (hash_tipo_autorizacion, [Tipo de última Autorización], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_tipo_autorizacion, \r\n    [Tipo de última Autorización], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_medicos_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_AUTORIZACION WHERE hash_tipo_autorizacion = farma.staging.hash_medicos_view.hash_tipo_autorizacion);\r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.hash_centros_view Stg \r\n       INNER JOIN MAESTROS.SAT_CENTRO Sat\r\n           ON  Sat.hash_codigo_centro      = Stg.hash_codigo_centro\r\n WHERE Sat.hash_diff <> Stg.[hash_diff]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ;    \r\n   \r\n\r\n\r\nINSERT INTO MAESTROS.SAT_CENTRO \r\n    (hash_codigo_centro, \r\n    [Nombre Centro], \r\n    [Código Comunidad Autónoma], \r\n    [Correo  Electrónico], \r\n    Fax, \r\n    Teléfono, \r\n    Url, \r\n    [Fecha Autorización  de Funcionamiento], \r\n    [Fecha de última  Autorización],\r\n     START_DTS,\r\n     END_DTS,\r\n     hash_diff)\r\nSELECT \r\n    DISTINCT hash_codigo_centro, \r\n    [Nombre Centro], \r\n    [Código Comunidad Autónoma], \r\n    [Correo  Electrónico], \r\n    Fax, \r\n    Teléfono, \r\n    Url, \r\n    [Fecha Autorización  de Funcionamiento], \r\n    [Fecha de última  Autorización],\r\n    LOAD_DTS  START_DTS,\r\n    NULL  END_DTS,\r\n    hash_diff    \r\n--INTO MAESTROS.SAT_CENTRO \r\n    FROM \r\n    farma.staging.hash_medicos_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.SAT_CENTRO WHERE hash_codigo_centro = farma.staging.hash_medicos_view.hash_codigo_centro AND hash_diff=hash_medicos_view.hash_diff);\r\n   \r\n\r\n   \r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.hash_centros_view Stg \r\n       INNER JOIN MAESTROS.LINK_CENTRO_DIRECCION Sat\r\n           ON  Sat.hash_codigo_centro      = Stg.hash_codigo_centro\r\n WHERE Sat.hash_direccion <> Stg.[hash_direccion]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ;    \r\n \r\n   \r\n   \r\nINSERT INTO MAESTROS.LINK_CENTRO_DIRECCION \r\n    ( hash_codigo_centro,\r\n     hash_direccion,\r\n     START_DTS,\r\n     END_DTS)   \r\n   SELECT \r\n    DISTINCT hash_codigo_centro, hash_direccion , LOAD_DTS START_DTS, NULL END_DTS\r\n--INTO MAESTROS.LINK_CENTRO_DIRECCION\r\nFROM \r\n    farma.staging.hash_medicos_view    \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.LINK_CENTRO_DIRECCION \r\n   \t\t\t\tWHERE hash_codigo_centro = farma.staging.hash_medicos_view.hash_codigo_centro AND\r\n   \t\t\t    hash_direccion =farma.staging.hash_medicos_view.hash_direccion );\r\n   "
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					},
+					{
+						"name": "DV hospitales",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "DV medicos",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "farma",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "Query",
+									"text": "-- 1. HUB_CODIGO_CENTRO\r\nINSERT INTO MAESTROS.HUB_CODIGO_CENTRO \r\n    (hash_codigo_centro, [Código de Centro Normalizado REGCESS (CCN)], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_codigo_centro, \r\n    [Código de Centro Normalizado REGCESS (CCN)], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_hospital_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_CODIGO_CENTRO WHERE hash_codigo_centro = farma.staging.hash_hospital_view.hash_codigo_centro);\r\n\r\n-- 2. HUB_TIPO_CENTRO\r\nINSERT INTO MAESTROS.HUB_TIPO_CENTRO \r\n    (hash_tipo_centro, [Tipo centro], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_tipo_centro, \r\n    [Tipo centro], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_hospital_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_CENTRO WHERE hash_tipo_centro = farma.staging.hash_hospital_view.hash_tipo_centro);\r\n\r\n-- 3. HUB_DEPENDENCIA_FUNCIONAL\r\nINSERT INTO MAESTROS.HUB_DEPENDENCIA_FUNCIONAL \r\n    (hash_dependencia_funcional, [Dependencia  Funcional], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_dependencia_funcional, \r\n    [Dependencia  Funcional], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_hospital_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_DEPENDENCIA_FUNCIONAL WHERE hash_dependencia_funcional = farma.staging.hash_hospital_view.hash_dependencia_funcional);\r\n\r\n-- 4. HUB_GRUPO_FUNCIONAL\r\nINSERT INTO MAESTROS.HUB_GRUPO_FUNCIONAL \r\n    (hash_grupo_funcional, [Grupo de dependencia  Funcional], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_grupo_funcional, \r\n    [Grupo de dependencia  Funcional], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_hospital_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_GRUPO_FUNCIONAL WHERE hash_grupo_funcional = farma.staging.hash_hospital_view.hash_grupo_funcional);\r\n\r\n-- 5. HUB_TIPO_AUTORIZACION\r\nINSERT INTO MAESTROS.HUB_TIPO_AUTORIZACION \r\n    (hash_tipo_autorizacion, [Tipo de última Autorización], LOAD_DTS)\r\nSELECT DISTINCT \r\n    hash_tipo_autorizacion, \r\n    [Tipo de última Autorización], \r\n    LOAD_DTS\r\nFROM farma.staging.hash_hospital_view\r\nWHERE NOT EXISTS (SELECT 1 FROM MAESTROS.HUB_TIPO_AUTORIZACION WHERE hash_tipo_autorizacion = farma.staging.hash_hospital_view.hash_tipo_autorizacion);\r\n\r\n\r\n\r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.hash_centros_view Stg \r\n       INNER JOIN MAESTROS.SAT_CENTRO Sat\r\n           ON  Sat.hash_codigo_centro      = Stg.hash_codigo_centro\r\n WHERE Sat.hash_diff <> Stg.[hash_diff]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ;    \r\n   \r\n\r\n\r\nINSERT INTO MAESTROS.SAT_CENTRO \r\n    (hash_codigo_centro, \r\n    [Nombre Centro], \r\n    [Código Comunidad Autónoma], \r\n    [Correo  Electrónico], \r\n    Fax, \r\n    Teléfono, \r\n    Url, \r\n    [Fecha Autorización  de Funcionamiento], \r\n    [Fecha de última  Autorización],\r\n     START_DTS,\r\n     END_DTS,\r\n     hash_diff)\r\nSELECT \r\n    DISTINCT hash_codigo_centro, \r\n    [Nombre Centro], \r\n    [Código Comunidad Autónoma], \r\n    [Correo  Electrónico], \r\n    Fax, \r\n    Teléfono, \r\n    Url, \r\n    [Fecha Autorización  de Funcionamiento], \r\n    [Fecha de última  Autorización],\r\n    LOAD_DTS  START_DTS,\r\n    NULL  END_DTS,\r\n    hash_diff    \r\n--INTO MAESTROS.SAT_CENTRO \r\n    FROM \r\n    farma.staging.hash_hospital_view \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.SAT_CENTRO WHERE hash_codigo_centro = farma.staging.hash_hospital_view.hash_codigo_centro AND hash_diff=hash_hospital_view.hash_diff);\r\n   \r\n\r\n\r\nUPDATE Sat\r\n SET Sat.START_DTS = DATEADD(d,-1,Stg.LOAD_DTS)\r\n FROM staging.hash_centros_view Stg \r\n       INNER JOIN MAESTROS.LINK_CENTRO_DIRECCION Sat\r\n           ON  Sat.hash_codigo_centro      = Stg.hash_codigo_centro\r\n WHERE Sat.hash_direccion <> Stg.[hash_direccion]\r\n               AND Sat.[END_DTS] IS NULL\r\n               AND Sat.[START_DTS] < Stg.LOAD_DTS\r\n ;    \r\n \r\n   \r\n   \r\nINSERT INTO MAESTROS.LINK_CENTRO_DIRECCION \r\n    ( hash_codigo_centro,\r\n     hash_direccion,\r\n     START_DTS,\r\n     END_DTS)   \r\n   SELECT \r\n    DISTINCT hash_codigo_centro, hash_direccion , LOAD_DTS START_DTS, NULL END_DTS\r\n--INTO MAESTROS.LINK_CENTRO_DIRECCION\r\nFROM \r\n    farma.staging.hash_hospital_view    \r\nWHERE \r\n    NOT EXISTS (SELECT 1 FROM MAESTROS.LINK_CENTRO_DIRECCION \r\n   \t\t\t\tWHERE hash_codigo_centro = farma.staging.hash_hospital_view.hash_codigo_centro AND\r\n   \t\t\t    hash_direccion =farma.staging.hash_hospital_view.hash_direccion );\r\n \r\n"
+								}
+							],
+							"scriptBlockExecutionTimeout": "02:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "3 STG TO DWH"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-10-18T12:18:50Z"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/99 borrar duplicados')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -761,86 +944,6 @@
 					"firstRowAsHeader": true
 				},
 				"schema": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/farma')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "farma",
-					"type": "LinkedServiceReference",
-					"parameters": {
-						"bbdd": {
-							"value": "@dataset().bbdd",
-							"type": "Expression"
-						}
-					}
-				},
-				"parameters": {
-					"esquema": {
-						"type": "string"
-					},
-					"tabla": {
-						"type": "string"
-					},
-					"bbdd": {
-						"type": "string",
-						"defaultValue": "farma"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().esquema",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().tabla",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/performance')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "pefformance",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"esquema": {
-						"type": "string"
-					},
-					"tabla": {
-						"type": "string"
-					},
-					"bbdd": {
-						"type": "string",
-						"defaultValue": "farma"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"schema": {
-						"value": "@dataset().esquema",
-						"type": "Expression"
-					},
-					"table": {
-						"value": "@dataset().tabla",
-						"type": "Expression"
-					}
-				}
 			},
 			"dependsOn": []
 		}

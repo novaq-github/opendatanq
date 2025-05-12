@@ -13,6 +13,160 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/2 carga catastro_v2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "copia catastro_agregado_portales",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "IF EXISTS (SELECT * FROM sys.tables WHERE name = 'tb_catastro_portales_espejo' AND type = 'U')\nBEGIN\n    \tdrop TABLE STG.tb_catastro_portales_espejo;\n\tEND",
+								"writeBehavior": "insert",
+								"sqlWriterUseTableLock": false,
+								"tableOption": "autoCreate",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DelimitedText_comas",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DWH_open_data",
+								"type": "DatasetReference",
+								"parameters": {
+									"esquema": "STG",
+									"tabla": "tb_catastro_portales_espejo"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-11-14T13:59:07Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/2 copia maestro_farmacias_excel')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "copia maestro_farmacias_excel",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "ExcelSource",
+								"storeSettings": {
+									"type": "AzureFileStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							},
+							"sink": {
+								"type": "ParquetSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "ParquetWriteSettings"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "backupfarmades",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "archivos_parquet",
+								"type": "DatasetReference",
+								"parameters": {
+									"contenedor": "salud",
+									"directorio": "maestros/maestros_farmacias"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"folder": {
+					"name": "2 DL to STG"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/3 DATOS CATASTRO FINCAS')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -7095,299 +7249,6 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2024-01-26T11:11:19Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_csv_carpeta_comas')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy data",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"additionalColumns": [
-									{
-										"name": "LOAD_DTS",
-										"value": {
-											"value": "@pipeline().TriggerTime",
-											"type": "Expression"
-										}
-									}
-								],
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"wildcardFileName": "*.csv",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "AzureSqlSink",
-								"preCopyScript": {
-									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
-									"type": "Expression"
-								},
-								"writeBehavior": "insert",
-								"sqlWriterUseTableLock": false,
-								"tableOption": "autoCreate",
-								"disableMetricsCollection": false
-							},
-							"enableStaging": false,
-							"enableSkipIncompatibleRow": true,
-							"logSettings": {
-								"enableCopyActivityLog": true,
-								"copyActivityLogSettings": {
-									"logLevel": "Warning",
-									"enableReliableLogging": false
-								},
-								"logLocationSettings": {
-									"linkedServiceName": {
-										"referenceName": "AzureBlobStorage1",
-										"type": "LinkedServiceReference"
-									}
-								}
-							},
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "archivo_texto_Data_Lake_coma",
-								"type": "DatasetReference",
-								"parameters": {
-									"directorio": {
-										"value": "@pipeline().parameters.directorio",
-										"type": "Expression"
-									},
-									"contenedor": {
-										"value": "@pipeline().parameters.contenedor",
-										"type": "Expression"
-									},
-									"fichero": "1"
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "farma",
-								"type": "DatasetReference",
-								"parameters": {
-									"esquema": {
-										"value": "@pipeline().parameters.esquema",
-										"type": "Expression"
-									},
-									"tabla": {
-										"value": "@pipeline().parameters.tabla",
-										"type": "Expression"
-									},
-									"bbdd": {
-										"value": "@pipeline().parameters.bbdd",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"contenedor": {
-						"type": "string",
-						"defaultValue": "salud"
-					},
-					"directorio": {
-						"type": "string",
-						"defaultValue": "direcciones/zonas_influencia"
-					},
-					"esquema": {
-						"type": "string",
-						"defaultValue": "staging"
-					},
-					"tabla": {
-						"type": "string",
-						"defaultValue": "zonas_influencia"
-					},
-					"bbdd": {
-						"type": "string",
-						"defaultValue": "farma"
-					}
-				},
-				"folder": {
-					"name": "2 DL to STG"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-01-26T11:11:19Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/data_lake_to_bbdd_parquet_carpeta')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy data",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "ParquetSource",
-								"additionalColumns": [
-									{
-										"name": "LOAD_DTS",
-										"value": {
-											"value": "@pipeline().TriggerTime",
-											"type": "Expression"
-										}
-									}
-								],
-								"storeSettings": {
-									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
-									"wildcardFileName": "*.parquet",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "ParquetReadSettings"
-								}
-							},
-							"sink": {
-								"type": "AzureSqlSink",
-								"preCopyScript": {
-									"value": "IF EXISTS (SELECT * FROM sys.tables WHERE name = '@{pipeline().parameters.tabla}' AND type = 'U')\nBEGIN\n    \tdrop TABLE @{pipeline().parameters.esquema}.@{pipeline().parameters.tabla};\n\tEND",
-									"type": "Expression"
-								},
-								"writeBehavior": "insert",
-								"sqlWriterUseTableLock": false,
-								"tableOption": "autoCreate",
-								"disableMetricsCollection": false
-							},
-							"enableStaging": false,
-							"enableSkipIncompatibleRow": true,
-							"logSettings": {
-								"enableCopyActivityLog": true,
-								"copyActivityLogSettings": {
-									"logLevel": "Warning",
-									"enableReliableLogging": false
-								},
-								"logLocationSettings": {
-									"linkedServiceName": {
-										"referenceName": "AzureBlobStorage1",
-										"type": "LinkedServiceReference"
-									}
-								}
-							},
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "archivos_parquet",
-								"type": "DatasetReference",
-								"parameters": {
-									"contenedor": {
-										"value": "@pipeline().parameters.contenedor",
-										"type": "Expression"
-									},
-									"directorio": {
-										"value": "@pipeline().parameters.directorio",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "farma",
-								"type": "DatasetReference",
-								"parameters": {
-									"esquema": {
-										"value": "@pipeline().parameters.esquema",
-										"type": "Expression"
-									},
-									"tabla": {
-										"value": "@pipeline().parameters.tabla",
-										"type": "Expression"
-									},
-									"bbdd": {
-										"value": "@pipeline().parameters.bbdd",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"contenedor": {
-						"type": "string",
-						"defaultValue": "salud"
-					},
-					"directorio": {
-						"type": "string",
-						"defaultValue": "direcciones/zonas_influencia"
-					},
-					"esquema": {
-						"type": "string",
-						"defaultValue": "staging"
-					},
-					"tabla": {
-						"type": "string",
-						"defaultValue": "zonas_influencia"
-					},
-					"bbdd": {
-						"type": "string",
-						"defaultValue": "farma"
-					}
-				},
-				"folder": {
-					"name": "2 DL to STG"
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-02-12T16:05:09Z"
 			},
 			"dependsOn": []
 		}

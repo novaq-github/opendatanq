@@ -67,13 +67,17 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'storage_avron'"
 		},
+		"AzureDatabricksDeltaLake2_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'AzureDatabricksDeltaLake2'"
+		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {
 			"type": "string",
 			"defaultValue": "https://afaemet.azurewebsites.net"
 		},
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"type": "string",
-			"defaultValue": "https://opendatanq.dfs.core.windows.net/"
+			"defaultValue": "https://nvqltopendatanqdes.dfs.core.windows.net"
 		},
 		"AzureDatabricks1_properties_typeProperties_existingClusterId": {
 			"type": "string",
@@ -153,6 +157,9 @@
 					},
 					"storage_avron_accountKey": {
 						"value": "[parameters('storage_avron_accountKey')]"
+					},
+					"AzureDatabricksDeltaLake2_accessToken": {
+						"value": "[parameters('AzureDatabricksDeltaLake2_accessToken')]"
 					},
 					"AFAemet_properties_typeProperties_functionAppUrl": {
 						"value": "[parameters('AFAemet_properties_typeProperties_functionAppUrl')]"

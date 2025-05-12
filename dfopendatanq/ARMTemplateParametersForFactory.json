@@ -50,11 +50,14 @@
 		"storage_avron_accountKey": {
 			"value": ""
 		},
+		"AzureDatabricksDeltaLake2_accessToken": {
+			"value": ""
+		},
 		"AFAemet_properties_typeProperties_functionAppUrl": {
 			"value": "https://afaemet.azurewebsites.net"
 		},
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
-			"value": "https://opendatanq.dfs.core.windows.net/"
+			"value": "https://nvqltopendatanqdes.dfs.core.windows.net"
 		},
 		"AzureDatabricks1_properties_typeProperties_existingClusterId": {
 			"value": "0625-073029-ghho04up"
